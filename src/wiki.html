@@ -18,8 +18,6 @@
 <style>
 html, body { margin: 0; background: var(--leinwand); color: var(--ink); }
 body { padding-top: env(safe-area-inset-top, 0px); padding-bottom: env(safe-area-inset-bottom, 0px); }
-.marke { white-space: nowrap; flex-shrink: 0; }
-@media (max-width: 820px) { .marke { font-size: 15px; } .suche { flex: 1 1 auto; } }
 
 :root {
   color-scheme: light;
@@ -87,188 +85,249 @@ button { font: inherit; color: inherit; cursor: pointer; }
 a { color: inherit; }
 :focus-visible { outline: 2px solid var(--akzent); outline-offset: 2px; border-radius: 8px; }
 
-.app { max-width: 1180px; margin: 0 auto; padding-inline: 16px; padding-block: 10px 64px;
-  display: flex; flex-direction: column; gap: 12px; }
+/* ---------- Aufbau: Leiste links, Mitte mit Himmel und Inhalt ---------- */
+.app { display: grid; grid-template-columns: 276px minmax(0, 1fr); min-height: 100vh; }
+.mitte { min-width: 0; padding: 0 32px 80px; display: flex; flex-direction: column; align-items: center; }
+.mitte > * { width: 100%; max-width: 980px; }
+.vorhang, .oben { display: none; }
 
-/* ---------- Kopf ---------- */
-.kopf { display: flex; align-items: center; gap: 12px; min-height: 40px; }
-.marke { display: flex; align-items: center; gap: 9px; background: none; border: 0; padding: 4px 6px 4px 2px;
-  font-family: var(--anzeige); font-weight: 600; font-size: 16px; letter-spacing: -.01em; }
+/* ---------- Leiste ---------- */
+.leiste { position: sticky; top: 0; height: 100vh; overflow-y: auto; padding: 18px 12px 22px; display: flex; flex-direction: column; gap: 16px;
+  border-right: 1px solid var(--linie); background: color-mix(in srgb, var(--leinwand) 80%, transparent); backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px); scrollbar-width: thin; }
+.marke { display: flex; align-items: center; gap: 9px; background: none; border: 0; padding: 4px 8px; font-family: var(--anzeige);
+  font-weight: 600; font-size: 15.5px; letter-spacing: -.01em; white-space: nowrap; align-self: flex-start; }
 .marke svg { color: var(--akzent); }
-.suche { margin-left: auto; position: relative; flex: 0 1 320px; min-width: 0; }
-.suche input { width: 100%; height: 36px; border-radius: 99px; border: 1px solid var(--linie);
-  background: var(--panel); color: var(--ink); padding: 0 14px 0 36px; font: inherit; font-size: 14px; }
-.suche input:focus { outline: none; border-color: var(--akzent); }
-.suche svg { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--grau); pointer-events: none; }
-.suche kbd { position: absolute; right: 11px; top: 50%; transform: translateY(-50%); font: 500 11px var(--text);
-  color: var(--grau); border: 1px solid var(--linie); border-radius: 5px; padding: 0 5px; pointer-events: none; }
-.treffer { position: absolute; top: 42px; right: 0; left: 0; min-width: 300px; z-index: 30; background: var(--panel);
-  border-radius: 14px; box-shadow: var(--schatten); border: 1px solid var(--linie); padding: 6px; max-height: 60vh; overflow: auto; }
-.treffer button { display: flex; flex-direction: column; gap: 1px; width: 100%; text-align: left; background: none; border: 0;
+.suche { position: relative; }
+.suche input { width: 100%; height: 38px; border-radius: 10px; border: 1px solid var(--linie); background: var(--panel); color: var(--ink);
+  padding: 0 34px; font: inherit; font-size: 14px; transition: border-color .2s var(--ease), box-shadow .2s var(--ease); }
+.suche input:focus { outline: none; border-color: var(--akzent); box-shadow: 0 0 0 4px var(--akzent-weich); }
+.suche > svg { position: absolute; left: 11px; top: 50%; transform: translateY(-50%); color: var(--grau); pointer-events: none; }
+.suche kbd { position: absolute; right: 10px; top: 50%; transform: translateY(-50%); font: 500 11px var(--text); color: var(--grau);
+  border: 1px solid var(--linie); border-radius: 5px; padding: 0 5px; pointer-events: none; }
+.treffer { position: absolute; top: 44px; left: 0; width: min(460px, calc(100vw - 24px)); z-index: 70; background: var(--panel);
+  border-radius: 14px; box-shadow: var(--schatten); border: 1px solid var(--linie); padding: 6px; max-height: 64vh; overflow: auto; }
+.treffer button { display: grid; grid-template-columns: 22px 1fr; gap: 0 8px; width: 100%; text-align: left; background: none; border: 0;
   padding: 8px 10px; border-radius: 10px; }
+.treffer button svg { grid-row: span 2; margin-top: 2px; color: var(--grau); }
 .treffer button[aria-selected="true"], .treffer button:hover { background: var(--panel2); }
 .treffer .t1 { font-weight: 500; }
-.treffer .t2 { font-size: 12.5px; color: var(--grau); }
+.treffer .t2 { font-size: 12.5px; color: var(--grau); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.treffer mark { background: var(--akzent-weich); color: inherit; border-radius: 3px; padding: 0 1px; }
 .treffer .leer { padding: 10px; color: var(--grau); font-size: 13px; }
+
+.baum { display: flex; flex-direction: column; gap: 14px; }
+.baum-teil { display: flex; flex-direction: column; gap: 1px; }
+.baum-titel { display: flex; align-items: center; gap: 6px; width: 100%; border: 0; background: none; text-align: left;
+  font: 600 11px/1 var(--text); letter-spacing: .07em; text-transform: uppercase; color: var(--grau); padding: 7px 10px; border-radius: 6px; }
+.baum-titel:hover { color: var(--ink2); }
+.baum-titel .n { margin-left: auto; font-weight: 500; letter-spacing: 0; font-variant-numeric: tabular-nums; }
+.baum-titel .pf { transition: transform .25s var(--ease); }
+.baum-titel[aria-expanded="true"] .pf, .zeile[aria-expanded="true"] .pf { transform: rotate(90deg); }
+.zeile { display: flex; align-items: center; gap: 9px; width: 100%; text-align: left; border: 0; background: none; padding: 6px 10px;
+  border-radius: 8px; color: var(--ink2); font-size: 13.5px; line-height: 1.35; transition: background .15s var(--ease), color .15s var(--ease); }
+.zeile:hover { background: var(--panel2); color: var(--ink); }
+.zeile[aria-current="page"] { background: var(--akzent-weich); color: var(--ink); font-weight: 500; }
+.zeile > svg { flex-shrink: 0; color: var(--grau); }
+.zeile[aria-current="page"] > svg { color: var(--akzent); }
+.zeile .name { flex: 1; min-width: 0; }
+.zeile .n { font-size: 11.5px; color: var(--grau); font-variant-numeric: tabular-nums; }
+.zeile .pf { color: var(--grau); flex-shrink: 0; transition: transform .25s var(--ease); }
+.unterliste { display: flex; flex-direction: column; gap: 1px; margin: 2px 0 6px 17px; padding-left: 9px; border-left: 1px solid var(--linie); }
+.unterliste .zeile { font-size: 13px; padding: 5px 10px; }
+.zu { display: none !important; }
+.leiste .leise { font-size: 12px; color: var(--grau); padding: 2px 10px; line-height: 1.45; }
+.leiste-fuss { margin-top: auto; padding: 10px 10px 0; font-size: 12px; color: var(--grau); display: flex; flex-direction: column; gap: 6px;
+  border-top: 1px solid var(--linie); font-variant-numeric: tabular-nums; }
+.wartet { display: flex; align-items: center; gap: 8px; }
+.wartet i { width: 7px; height: 7px; border-radius: 50%; background: var(--ocker); display: inline-block; flex-shrink: 0; }
+
+/* ---------- Schmal: Leiste als Schublade ---------- */
+@media (max-width: 860px) {
+  .app { grid-template-columns: minmax(0, 1fr); }
+  .leiste { position: fixed; z-index: 60; left: 0; top: 0; bottom: 0; height: auto; width: min(320px, 86vw); transform: translateX(-104%);
+    transition: transform .38s var(--ease); background: var(--leinwand); box-shadow: 0 0 40px rgba(10,10,20,.18);
+    padding-top: calc(16px + env(safe-area-inset-top, 0px)); }
+  .app[data-schublade="auf"] .leiste { transform: none; }
+  .vorhang { display: block; position: fixed; inset: 0; z-index: 55; background: rgba(10,10,18,.34); opacity: 0; pointer-events: none;
+    transition: opacity .3s var(--ease); }
+  .app[data-schublade="auf"] .vorhang { opacity: 1; pointer-events: auto; }
+  .mitte { padding: 0 16px 56px; }
+  .oben { display: flex; align-items: center; gap: 4px; position: sticky; top: env(safe-area-inset-top, 0px); z-index: 40; height: 54px;
+    margin: 0 -16px; padding: 0 8px; background: color-mix(in srgb, var(--leinwand) 86%, transparent); backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px); max-width: none; width: auto; align-self: stretch; }
+  .oben .marke { font-size: 15px; padding: 4px; }
+  .rund { width: 42px; height: 42px; border-radius: 12px; border: 0; background: none; display: grid; place-items: center; color: var(--ink2); }
+  .rund:hover { background: var(--panel2); }
+  .oben .rund:last-child { margin-left: auto; }
+  .suche kbd { display: none; }
+}
 
 /* ---------- Himmel ---------- */
 .grund { position: fixed; inset: 0; width: 100%; height: 100%; display: block; z-index: 0; pointer-events: none; }
 .app { position: relative; z-index: 1; }
-.himmel { position: relative; height: clamp(170px, 31vh, 270px); transition: height .55s var(--ease); cursor: default;
+.himmel { position: relative; height: clamp(190px, 34vh, 320px); transition: height .55s var(--ease); cursor: default;
   -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
 .himmel[data-zeiger="ja"] { cursor: pointer; }
-.app[data-tief="ja"] .himmel { height: clamp(150px, 26vh, 230px); }
-.himmel-ort { position: absolute; left: 14px; bottom: 12px; display: flex; align-items: center; gap: 6px; max-width: calc(100% - 160px); white-space: nowrap; overflow: hidden;
+.app[data-tief="ja"] .himmel { height: clamp(150px, 24vh, 220px); }
+.himmel-ort { position: absolute; left: 4px; bottom: 46px; display: flex; align-items: center; gap: 6px; max-width: calc(100% - 160px); white-space: nowrap; overflow: hidden;
   font-size: 12.5px; color: var(--h-schrift); pointer-events: none; }
+.himmel-ort[hidden] { display: none; }
 .himmel-ort b { font-weight: 600; }
 .himmel-ort .sep { opacity: .45; }
-.himmel-knopf { position: absolute; right: 12px; bottom: 10px; height: 30px; padding: 0 12px; border-radius: 99px;
+.himmel-knopf { position: absolute; right: 4px; bottom: 44px; height: 30px; padding: 0 12px; border-radius: 99px;
   border: 1px solid color-mix(in srgb, var(--h-schrift) 18%, transparent); background: color-mix(in srgb, var(--h-unten) 70%, transparent);
   color: var(--h-schrift); font-size: 12.5px; display: flex; align-items: center; gap: 6px; backdrop-filter: blur(6px);
   transition: opacity .25s var(--ease); }
 .himmel-knopf[hidden] { display: none; }
 
-/* ---------- Reiter ---------- */
-.reiter { display: flex; gap: 4px; padding: 4px; background: var(--panel); border-radius: 99px; align-self: flex-start;
-  box-shadow: var(--schatten); max-width: 100%; overflow-x: auto; scrollbar-width: none; }
-.reiter button { border: 0; background: none; height: 34px; padding: 0 16px; border-radius: 99px; color: var(--ink2);
-  font-weight: 500; white-space: nowrap; display: flex; align-items: center; gap: 7px;
-  transition: background .2s var(--ease), color .2s var(--ease); }
-.reiter button .n { font-size: 12px; color: var(--grau); font-variant-numeric: tabular-nums; }
-.reiter button[aria-selected="true"] { background: var(--pille); color: var(--pille-text); }
-.reiter button[aria-selected="true"] .n { color: color-mix(in srgb, var(--pille-text) 60%, transparent); }
+/* ---------- Inhalt ---------- */
+.inhalt { position: relative; margin-top: -34px; background: var(--panel); border-radius: 20px; box-shadow: var(--schatten);
+  padding: 36px 48px 40px; container: blatt / inline-size; }
+.inhalt[data-seite="start"] { background: none; box-shadow: none; padding: 0; margin-top: -48px; }
+.inhalt.ein > * { animation: ein .42s var(--ease) both; }
+.inhalt.ein > *:nth-child(2) { animation-delay: .04s; } .inhalt.ein > *:nth-child(3) { animation-delay: .08s; }
+.inhalt.ein > *:nth-child(4) { animation-delay: .12s; } .inhalt.ein > *:nth-child(n+5) { animation-delay: .16s; }
+@keyframes ein { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
 
-/* ---------- Körper ---------- */
-.koerper { display: grid; grid-template-columns: 236px minmax(0, 1fr); gap: 14px; align-items: start; }
-.kats { position: sticky; top: 12px; background: var(--panel); border-radius: var(--r); box-shadow: var(--schatten);
-  padding: 8px; display: flex; flex-direction: column; gap: 2px; }
-.kats .kopfzeile { font-size: 12px; color: var(--grau); padding: 6px 10px 4px; }
-.kat { display: flex; align-items: center; gap: 10px; width: 100%; text-align: left; border: 0; background: none;
-  padding: 8px 10px; border-radius: 11px; color: var(--ink2); }
-.kat svg { flex-shrink: 0; color: var(--grau); }
-.kat .name { flex: 1; min-width: 0; }
-.kat .n { font-size: 12px; color: var(--grau); font-variant-numeric: tabular-nums; }
-.kat[aria-current="true"] { background: var(--akzent-weich); color: var(--ink); font-weight: 500; }
-.kat[aria-current="true"] svg { color: var(--akzent); }
-.kats .leise { font-size: 12px; color: var(--grau); padding: 8px 10px 4px; line-height: 1.45; }
-
-.inhalt { background: var(--panel); border-radius: var(--r); box-shadow: var(--schatten); padding: 28px 32px 30px; min-width: 0; }
-.inhalt.ein { animation: ein .32s var(--ease); }
-@keyframes ein { from { opacity: .35; transform: translateY(6px); } to { opacity: 1; transform: none; } }
-
-/* ---------- Typo im Inhalt ---------- */
-.krume { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; font-size: 12.5px; color: var(--grau); margin-bottom: 10px; }
-.krume button { border: 0; background: none; padding: 0; color: var(--grau); }
-.krume button:hover { color: var(--akzent); }
-h1 { font-family: var(--anzeige); font-weight: 600; font-size: 28px; line-height: 1.2; letter-spacing: -.02em; margin: 0;
-  text-wrap: balance; }
-h2 { font-family: var(--anzeige); font-weight: 600; font-size: 18px; letter-spacing: -.01em; margin: 0; text-wrap: balance; }
+h1 { font-family: var(--anzeige); font-weight: 600; font-size: 32px; line-height: 1.15; letter-spacing: -.025em; margin: 0; text-wrap: balance; }
+h2 { font-family: var(--anzeige); font-weight: 600; font-size: 19px; letter-spacing: -.015em; margin: 0; text-wrap: balance; }
 h3 { font-family: var(--anzeige); font-weight: 600; font-size: 15px; margin: 0; }
-.lead { font-size: 16.5px; color: var(--ink2); margin: 8px 0 0; max-width: 62ch; line-height: 1.5; }
-.meta { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 14px; }
-.chip { display: inline-flex; align-items: center; gap: 6px; height: 28px; padding: 0 11px; border-radius: 99px;
-  background: var(--panel2); border: 1px solid var(--linie2); font-size: 12.5px; color: var(--ink2); }
-button.chip:hover { border-color: var(--akzent); color: var(--ink); }
-.chip.werkzeug svg { color: var(--grau); }
+.ueber { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; font-size: 12.5px; color: var(--grau); margin-bottom: 12px; }
+.ueber svg { color: var(--akzent); }
+.ueber button { border: 0; background: none; padding: 0; color: var(--grau); display: inline-flex; align-items: center; gap: 6px; }
+.ueber button:hover { color: var(--akzent); }
+.wann { font-size: 16.5px; color: var(--ink2); margin: 10px 0 0; max-width: 60ch; line-height: 1.5; text-wrap: pretty; }
+.meta { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 18px; margin-top: 18px; padding-top: 16px; border-top: 1px solid var(--linie2);
+  font-size: 13px; color: var(--grau); }
+.meta .wz { display: inline-flex; align-items: baseline; gap: 7px; }
+.meta .wz > svg { flex-shrink: 0; align-self: center; }
+.textlink { border: 0; background: none; padding: 0; color: var(--ink2); font-size: inherit; text-decoration: underline;
+  text-decoration-color: var(--linie); text-underline-offset: 3px; transition: color .15s var(--ease), text-decoration-color .15s var(--ease); }
+.textlink:hover { color: var(--akzent); text-decoration-color: currentColor; }
+.inhalt-liste { display: inline-flex; flex-wrap: wrap; gap: 4px 14px; min-width: 0; }
 
-.toc { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 18px; padding-top: 14px; border-top: 1px solid var(--linie2); }
-.toc span { font-size: 12px; color: var(--grau); margin-right: 4px; align-self: center; }
-.toc button { border: 0; background: none; padding: 3px 8px; border-radius: 8px; font-size: 13px; color: var(--ink2); }
-.toc button:hover { background: var(--panel2); color: var(--ink); }
-
-.abschnitt { margin-top: 26px; display: flex; flex-direction: column; gap: 10px; scroll-margin-top: 16px; }
-.abschnitt .intro { margin: 0; color: var(--ink2); max-width: 64ch; }
-ol.schritte { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 0; counter-reset: s; max-width: 70ch; }
-ol.schritte li { counter-increment: s; display: grid; grid-template-columns: 28px 1fr; gap: 10px; padding: 7px 0; position: relative; }
-ol.schritte li::before { content: counter(s); width: 24px; height: 24px; border-radius: 50%; background: var(--akzent-weich);
-  color: var(--akzent); font: 600 12px var(--anzeige); display: flex; align-items: center; justify-content: center;
-  font-variant-numeric: tabular-nums; margin-top: 1px; }
-ol.schritte li:not(:last-child)::after { content: ""; position: absolute; left: 11.5px; top: 33px; bottom: -3px; width: 1px; background: var(--linie); }
-.achten { background: var(--panel2); border-radius: 14px; padding: 12px 16px; max-width: 70ch; }
-.achten h3 { font-size: 13px; color: var(--grau); font-weight: 500; font-family: var(--text); margin-bottom: 4px; }
-.achten ul { margin: 0; padding-left: 18px; display: flex; flex-direction: column; gap: 5px; }
-.achten li::marker { color: var(--akzent); }
+/* Abschnitte eines Ablaufs */
+.abschnitt { margin-top: 34px; scroll-margin-top: 72px; }
+.abschnitt-kopf { display: flex; align-items: baseline; gap: 10px; margin-bottom: 4px; }
+.abschnitt-kopf .nr { font: 600 12px var(--anzeige); color: var(--akzent); font-variant-numeric: tabular-nums; }
+.abschnitt .intro { margin: 2px 0 0; color: var(--grau); max-width: 62ch; font-size: 14px; }
+.raster { display: grid; gap: 14px 36px; margin-top: 14px; }
+@container blatt (min-width: 720px) { .raster.mit-notiz { grid-template-columns: minmax(0, 1fr) 250px; } }
+ol.schritte { list-style: none; margin: 0; padding: 0; counter-reset: s; max-width: 66ch; }
+ol.schritte li { counter-increment: s; display: grid; grid-template-columns: 30px 1fr; gap: 12px; padding: 8px 0; position: relative; font-size: 15px; line-height: 1.55; }
+ol.schritte li::before { content: counter(s); width: 26px; height: 26px; border-radius: 50%; background: var(--akzent-weich); color: var(--akzent);
+  font: 600 12px var(--anzeige); display: flex; align-items: center; justify-content: center; font-variant-numeric: tabular-nums; margin-top: 0; }
+ol.schritte li:not(:last-child)::after { content: ""; position: absolute; left: 12.5px; top: 36px; bottom: -6px; width: 1px; background: var(--linie); }
+ol.schritte b, ul.punkte b { font-weight: 600; color: var(--ink); }
+.notiz { align-self: start; border-radius: 14px; background: var(--panel2); padding: 14px 16px; font-size: 13.5px; line-height: 1.5; color: var(--ink2); }
+.notiz h3 { font: 600 11px/1 var(--text); letter-spacing: .07em; text-transform: uppercase; color: var(--grau); margin-bottom: 10px; }
+.notiz ul { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 9px; }
+.notiz li { position: relative; padding-left: 14px; }
+.notiz li::before { content: ""; position: absolute; left: 0; top: .62em; width: 5px; height: 5px; border-radius: 50%; background: var(--akzent); }
 .unbest { display: inline-block; font-size: 11px; font-weight: 600; color: var(--ocker); background: var(--ocker-weich);
   border-radius: 99px; padding: 0 7px; margin-right: 6px; vertical-align: 1px; }
+ul.punkte { margin: 12px 0 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 10px; max-width: 68ch; font-size: 15px; }
+ul.punkte li { position: relative; padding-left: 18px; }
+ul.punkte li::before { content: ""; position: absolute; left: 2px; top: .66em; width: 6px; height: 6px; border-radius: 50%; background: var(--akzent); }
+.beleg { margin-top: 12px; font-size: 12px; color: var(--grau); display: flex; flex-wrap: wrap; gap: 4px 12px; }
 
-.block { margin-top: 30px; padding-top: 18px; border-top: 1px solid var(--linie2); display: flex; flex-direction: column; gap: 10px; }
-.block > .kz { font-size: 12.5px; color: var(--grau); }
-details.wkarte { border: 1px solid var(--linie); border-radius: 14px; background: var(--panel); overflow: hidden; }
-details.wkarte summary { list-style: none; cursor: pointer; padding: 11px 14px; display: grid; grid-template-columns: 1fr auto; gap: 2px 12px; }
-details.wkarte summary::-webkit-details-marker { display: none; }
-details.wkarte summary .t1 { font-weight: 500; }
-details.wkarte summary .t2 { grid-column: 1; font-size: 13px; color: var(--grau); }
-details.wkarte summary .pf { grid-row: 1 / span 2; grid-column: 2; align-self: center; color: var(--grau); transition: transform .25s var(--ease); }
-details.wkarte[open] summary .pf { transform: rotate(90deg); }
-details.wkarte .wk-inhalt { padding: 0 14px 14px; display: flex; flex-direction: column; gap: 10px; }
-.punkte { margin: 0; padding-left: 18px; display: flex; flex-direction: column; gap: 5px; max-width: 70ch; }
-.punkte li::marker { color: var(--akzent); }
-.beleg { font-size: 12px; color: var(--grau); display: flex; flex-wrap: wrap; gap: 4px 12px; }
-.textknopf { border: 0; background: none; padding: 0; color: var(--akzent); font-size: 13px; font-weight: 500; align-self: flex-start; }
-
-.anlass-nav { display: flex; flex-direction: column; gap: 8px; }
-.anlass-zeile { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; background: var(--panel2); border-radius: 12px; padding: 8px 10px 8px 14px; }
-.anlass-zeile .was { flex: 1; min-width: 140px; font-size: 13.5px; }
-.anlass-zeile .was b { font-weight: 600; }
-.anlass-zeile .wo { color: var(--grau); font-size: 12.5px; font-variant-numeric: tabular-nums; }
-.blaettern { display: flex; gap: 6px; }
-.blaettern button { height: 30px; padding: 0 11px; border-radius: 99px; border: 1px solid var(--linie); background: var(--panel);
-  font-size: 12.5px; color: var(--ink2); max-width: 220px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.blaettern button:disabled { opacity: .35; cursor: default; }
-.blaettern button:not(:disabled):hover { border-color: var(--akzent); color: var(--ink); }
-.links { display: flex; flex-wrap: wrap; gap: 6px; }
-.fuss { margin-top: 26px; font-size: 12px; color: var(--grau); display: flex; flex-wrap: wrap; gap: 4px 14px; }
-
-/* ---------- Listen ---------- */
-.liste { display: flex; flex-direction: column; margin-top: 16px; }
-.eintrag { display: grid; grid-template-columns: 1fr auto; gap: 2px 14px; text-align: left; width: 100%; border: 0; background: none;
-  padding: 13px 14px; border-radius: 12px; }
-.eintrag + .eintrag { border-top: 1px solid var(--linie2); }
+/* Blöcke unter dem Inhalt */
+.block { margin-top: 40px; padding-top: 22px; border-top: 1px solid var(--linie2); display: flex; flex-direction: column; gap: 12px; }
+.block > h2 { font-size: 15px; }
+.zeilen { display: flex; flex-direction: column; border: 1px solid var(--linie); border-radius: 14px; overflow: hidden; }
+.eintrag { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 2px 14px; text-align: left; width: 100%;
+  border: 0; background: var(--panel); padding: 13px 16px; transition: background .15s var(--ease); }
+.eintrag + .eintrag, .eintrag + details, details + .eintrag, details + details { border-top: 1px solid var(--linie2); }
 .eintrag:hover { background: var(--panel2); }
-.eintrag:hover + .eintrag { border-top-color: transparent; }
-.eintrag .t1 { font-weight: 500; }
-.eintrag .t2 { grid-column: 1; font-size: 13px; color: var(--grau); }
-.eintrag .rechts { grid-row: 1 / span 2; grid-column: 2; align-self: center; font-size: 12px; color: var(--grau); display: flex; gap: 10px; align-items: center; }
-.gruppe { margin-top: 26px; }
-.gruppe:first-of-type { margin-top: 18px; }
-.gruppe h2 { display: flex; align-items: center; gap: 9px; }
-.gruppe h2 svg { color: var(--akzent); }
-.gruppe h2 button { border: 0; background: none; padding: 0; font: inherit; }
-.gruppe h2 button:hover { color: var(--akzent); }
-.gruppe .kurz { margin: 3px 0 0 27px; font-size: 13px; color: var(--grau); }
-.gruppe .liste { margin-top: 6px; }
+.eintrag .t1 { font-weight: 500; display: flex; align-items: center; gap: 8px; min-width: 0; }
+.eintrag .t1 svg { color: var(--grau); flex-shrink: 0; }
+.eintrag .t2 { grid-column: 1; font-size: 13px; color: var(--grau); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.eintrag .rechts { grid-row: 1 / span 2; grid-column: 2; font-size: 12px; color: var(--grau); display: flex; gap: 10px; align-items: center;
+  font-variant-numeric: tabular-nums; }
+details.wkarte summary { list-style: none; cursor: pointer; }
+details.wkarte summary::-webkit-details-marker { display: none; }
+details.wkarte .pf { transition: transform .25s var(--ease); }
+details.wkarte[open] .pf { transform: rotate(90deg); }
+details.wkarte .wk-inhalt { padding: 2px 16px 16px; display: flex; flex-direction: column; gap: 10px; background: var(--panel); }
+details.wkarte .wk-inhalt h3 { margin-top: 6px; font-size: 13.5px; }
+details.wkarte .wk-inhalt ul.punkte { font-size: 14px; margin-top: 4px; }
 
-.anlaesse { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 10px; margin-top: 14px; }
-.anlass { text-align: left; border: 1px solid var(--linie); background: var(--panel); border-radius: 14px; padding: 14px 15px;
-  display: flex; flex-direction: column; gap: 8px; transition: border-color .2s var(--ease); }
-.anlass:hover { border-color: var(--akzent); }
-.anlass .t1 { font-family: var(--anzeige); font-weight: 600; font-size: 15px; }
-.anlass .t2 { font-size: 13px; color: var(--grau); }
-.anlass .weg { display: flex; flex-wrap: wrap; gap: 4px; align-items: center; font-size: 12px; color: var(--ink2); }
-.anlass .weg i { font-style: normal; color: var(--grau); }
-.zahlen { display: flex; flex-wrap: wrap; gap: 6px 18px; margin-top: 10px; font-size: 13px; color: var(--grau); }
-.zahlen b { color: var(--ink); font-family: var(--anzeige); font-weight: 600; font-variant-numeric: tabular-nums; }
-.hinweisbox { margin-top: 26px; border: 1px dashed var(--linie); border-radius: 14px; padding: 12px 15px; font-size: 13px; color: var(--grau); }
+/* Weiter im Anlass */
+.weiter { display: flex; flex-direction: column; gap: 10px; }
+.weiter-kopf { display: flex; align-items: center; gap: 10px; font-size: 13px; color: var(--grau); }
+.weiter-kopf .punkte-reihe { display: inline-flex; gap: 4px; }
+.weiter-kopf .punkte-reihe i { width: 18px; height: 4px; border-radius: 2px; background: var(--linie); }
+.weiter-kopf .punkte-reihe i.da { background: var(--akzent); }
+.weiter-raster { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.weiter-karte { display: flex; flex-direction: column; gap: 3px; text-align: left; border: 1px solid var(--linie); background: var(--panel);
+  border-radius: 14px; padding: 14px 16px; transition: border-color .2s var(--ease), transform .2s var(--ease); }
+.weiter-karte:hover:not(:disabled) { border-color: var(--akzent); transform: translateY(-1px); }
+.weiter-karte:disabled { opacity: .45; cursor: default; }
+.weiter-karte .klein { font-size: 12px; color: var(--grau); }
+.weiter-karte .gross { font-family: var(--anzeige); font-weight: 600; font-size: 15px; }
+.weiter-karte.nach { text-align: right; align-items: flex-end; }
 
-/* ---------- Schmal ---------- */
-@media (max-width: 820px) {
-  .koerper { grid-template-columns: minmax(0, 1fr); }
-  .kats { position: static; flex-direction: row; overflow-x: auto; scrollbar-width: none; padding: 5px; border-radius: 99px; gap: 2px; }
-  .kats .kopfzeile, .kats .leise { display: none; }
-  .kat { width: auto; white-space: nowrap; border-radius: 99px; padding: 7px 12px; }
-  .kat .n { display: none; }
-  .inhalt { padding: 20px 18px 22px; }
-  h1 { font-size: 23px; }
-  .lead { font-size: 15px; }
-  .himmel { height: clamp(160px, 28vh, 230px); }
-  .app[data-tief="ja"] .himmel { height: clamp(140px, 24vh, 200px); }
+/* Ergänzen */
+.ergaenzen { margin-top: 36px; display: flex; flex-direction: column; gap: 10px; }
+.ergaenzen-auf { align-self: flex-start; border: 0; background: none; padding: 0; color: var(--grau); font-size: 13px; display: inline-flex; gap: 8px; align-items: center; }
+.ergaenzen-auf:hover { color: var(--akzent); }
+.ergaenzen textarea { width: 100%; min-height: 90px; resize: vertical; border-radius: 12px; border: 1px solid var(--linie); background: var(--panel2);
+  color: var(--ink); font: inherit; padding: 10px 12px; }
+.ergaenzen textarea:focus { outline: none; border-color: var(--akzent); }
+.ergaenzen .zeile-knopf { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; font-size: 12.5px; color: var(--grau); }
+.knopf { height: 36px; padding: 0 16px; border-radius: 10px; border: 0; background: var(--pille); color: var(--pille-text); font-weight: 500; font-size: 13.5px;
+  display: inline-flex; align-items: center; gap: 8px; }
+.knopf:disabled { opacity: .5; cursor: default; }
+.fuss { margin-top: 30px; font-size: 12px; color: var(--grau); display: flex; flex-wrap: wrap; gap: 4px 14px; }
+
+/* Anlass: der Weg */
+ol.pfad { list-style: none; margin: 24px 0 0; padding: 0; display: flex; flex-direction: column; counter-reset: p; }
+ol.pfad li { counter-increment: p; display: grid; grid-template-columns: 34px 1fr; gap: 10px; position: relative; }
+ol.pfad li::before { content: counter(p); width: 28px; height: 28px; margin-top: 13px; border-radius: 50%; background: var(--akzent-weich);
+  color: var(--akzent); font: 600 12.5px var(--anzeige); display: flex; align-items: center; justify-content: center; }
+ol.pfad li:not(:last-child)::after { content: ""; position: absolute; left: 13.5px; top: 45px; bottom: -11px; width: 1px; background: var(--linie); }
+ol.pfad .eintrag { border: 1px solid transparent; border-radius: 12px; }
+ol.pfad .eintrag:hover { border-color: var(--linie); }
+
+/* Startseite */
+.start-kopf { display: flex; flex-direction: column; gap: 8px; margin-bottom: 18px; }
+.start-kopf h1 { font-size: 40px; }
+.start-kopf .zahlen { font-size: 13.5px; color: var(--grau); font-variant-numeric: tabular-nums; }
+.grosssuche { display: flex; align-items: center; gap: 12px; width: 100%; height: 56px; border-radius: 16px; border: 1px solid var(--linie);
+  background: var(--panel); box-shadow: var(--schatten); padding: 0 18px; color: var(--grau); font-size: 16px; text-align: left;
+  transition: border-color .2s var(--ease); }
+.grosssuche:hover { border-color: var(--akzent); }
+.grosssuche kbd { margin-left: auto; font: 500 12px var(--text); border: 1px solid var(--linie); border-radius: 6px; padding: 1px 7px; }
+.start-teil { margin-top: 34px; display: flex; flex-direction: column; gap: 12px; }
+.start-teil > h2 { font-size: 15px; display: flex; align-items: baseline; gap: 8px; }
+.start-teil > h2 .n { font: 500 12.5px var(--text); color: var(--grau); }
+.kacheln { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 12px; }
+.kachel { display: flex; flex-direction: column; gap: 10px; text-align: left; border: 1px solid var(--linie); background: var(--panel);
+  border-radius: 16px; padding: 16px 18px; min-height: 112px; transition: border-color .2s var(--ease), transform .2s var(--ease), box-shadow .2s var(--ease); }
+.kachel:hover { border-color: var(--akzent); transform: translateY(-2px); box-shadow: var(--schatten); }
+.kachel .t1 { font-family: var(--anzeige); font-weight: 600; font-size: 15.5px; line-height: 1.3; }
+.kachel .t2 { margin-top: auto; font-size: 12.5px; color: var(--grau); font-variant-numeric: tabular-nums; }
+.kachel .wegzeichen { display: flex; align-items: center; gap: 3px; color: var(--grau); }
+.kachel .wegzeichen i { width: 8px; height: 1px; background: var(--linie); }
+.kachel .rund-zeichen { width: 36px; height: 36px; border-radius: 10px; background: var(--akzent-weich); color: var(--akzent); display: grid; place-items: center; }
+.start-zeilen .eintrag { background: var(--panel); }
+
+@media (max-width: 860px) {
+  .inhalt { margin-top: -26px; padding: 24px 20px 28px; border-radius: 18px; }
+  .inhalt[data-seite="start"] { margin-top: -36px; }
+  h1 { font-size: 26px; }
+  .start-kopf h1 { font-size: 32px; }
+  .wann { font-size: 15px; }
+  ol.schritte li { font-size: 14.5px; }
+  .weiter-raster { grid-template-columns: 1fr; }
+  .weiter-karte.nach { text-align: left; align-items: flex-start; }
+  .kacheln { grid-template-columns: 1fr 1fr; gap: 10px; }
+  .kachel { min-height: 96px; padding: 14px; }
+  .himmel { height: clamp(170px, 30vh, 240px); }
+  .app[data-tief="ja"] .himmel { height: clamp(130px, 20vh, 170px); }
   .himmel-ort { display: none; }
-  .suche { flex-basis: 180px; }
-  .suche kbd { display: none; }
-  .reiter { align-self: stretch; }
-  .reiter button { flex: 1; justify-content: center; padding: 0 10px; }
-  .reiter button .n { display: none; }
-  .treffer { left: auto; width: min(92vw, 360px); }
+  .himmel-knopf { bottom: 36px; }
 }
 
 /* ---------- Vor dem Wiki: Anmelden, Laden, Übernahme ---------- */
@@ -295,56 +354,40 @@ html[data-tor] .app, html[data-tor] .grund { display: none !important; }
 #tor .tor-meldung { margin: 0; min-height: 1.4em; text-align: center; color: var(--ink2); font-size: 13.5px; line-height: 1.5; }
 #tor .tor-meldung:empty { display: none; }
 
-/* ---------- Pfad (Anlass) ---------- */
-ol.pfad { list-style: none; margin: 18px 0 0; padding: 0; display: flex; flex-direction: column; counter-reset: p; }
-ol.pfad li { counter-increment: p; display: grid; grid-template-columns: 30px 1fr; gap: 8px; position: relative; }
-ol.pfad li::before { content: counter(p); width: 26px; height: 26px; margin-top: 12px; border-radius: 50%; background: var(--akzent-weich);
-  color: var(--akzent); font: 600 12px var(--anzeige); display: flex; align-items: center; justify-content: center; }
-ol.pfad li:not(:last-child)::after { content: ""; position: absolute; left: 12.5px; top: 42px; bottom: -8px; width: 1px; background: var(--linie); }
-ol.pfad .eintrag { border-top: 0 !important; }
-ol.pfad .eintrag .t2 .kz2 { color: var(--akzent); }
-
-/* ---------- Ergänzen ---------- */
-.ergaenzen { margin-top: 26px; border-top: 1px solid var(--linie2); padding-top: 14px; display: flex; flex-direction: column; gap: 8px; }
-.ergaenzen textarea { width: 100%; min-height: 84px; resize: vertical; border-radius: 12px; border: 1px solid var(--linie); background: var(--panel2);
-  color: var(--ink); font: inherit; padding: 10px 12px; }
-.ergaenzen textarea:focus { outline: none; border-color: var(--akzent); }
-.ergaenzen .zeile { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; font-size: 12.5px; color: var(--grau); }
-.knopf { height: 32px; padding: 0 14px; border-radius: 99px; border: 0; background: var(--pille); color: var(--pille-text); font-weight: 500; font-size: 13px; }
-.wartet { margin-top: 14px; font-size: 13px; color: var(--grau); display: flex; align-items: center; gap: 8px; }
-.wartet i { width: 7px; height: 7px; border-radius: 50%; background: var(--ocker); display: inline-block; }
-
-
 </style>
 </head>
 <body>
 <canvas class="grund" id="grund" aria-hidden="true"></canvas>
 <div class="app" id="app">
-  <header class="kopf">
+  <aside class="leiste" id="leiste" aria-label="Inhalt">
     <button type="button" class="marke" id="marke" aria-label="Zur Startseite">
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" aria-hidden="true"><path d="M12 2.8l2.3 6.1 6.5.3-5.1 4 1.8 6.3L12 15.9l-5.5 3.6 1.8-6.3-5.1-4 6.5-.3z"/></svg>
       Persönliches Wiki
     </button>
     <div class="suche">
       <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="M20 20l-4.2-4.2"/></svg>
-      <input id="suchfeld" type="search" placeholder="Im Wiki suchen" autocomplete="off" aria-label="Im Wiki suchen">
+      <input id="suchfeld" type="search" placeholder="Suchen" autocomplete="off" aria-label="Im Wiki suchen">
       <kbd>/</kbd>
       <div class="treffer" id="treffer" hidden></div>
     </div>
-  </header>
+    <nav class="baum" id="baum"></nav>
+    <div class="leiste-fuss" id="leistefuss"></div>
+  </aside>
+  <div class="vorhang" aria-hidden="true"></div>
 
-  <section class="himmel" id="band" aria-label="Sternenkarte">
-    <div class="himmel-ort" id="himmelOrt"></div>
-    <button type="button" class="himmel-knopf" id="rauszoomen" hidden>
-      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M9 4H4v5M15 4h5v5M9 20H4v-5M15 20h5v-5"/></svg>
-      <span>Alles zeigen</span>
-    </button>
-  </section>
-
-  <nav class="reiter" id="reiter" role="tablist" aria-label="Bereiche"></nav>
-
-  <div class="koerper">
-    <aside class="kats" id="kats" aria-label="Kategorien"></aside>
+  <div class="mitte">
+    <header class="oben">
+      <button type="button" class="rund" data-menue="1" aria-label="Inhalt öffnen"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h10"/></svg></button>
+      <button type="button" class="marke" data-marke="1"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" aria-hidden="true"><path d="M12 2.8l2.3 6.1 6.5.3-5.1 4 1.8 6.3L12 15.9l-5.5 3.6 1.8-6.3-5.1-4 6.5-.3z"/></svg>Wiki</button>
+      <button type="button" class="rund" data-sucheauf="1" aria-label="Suchen"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="M20 20l-4.2-4.2"/></svg></button>
+    </header>
+    <section class="himmel" id="band" aria-label="Sternenkarte">
+      <div class="himmel-ort" id="himmelOrt"></div>
+      <button type="button" class="himmel-knopf" id="rauszoomen" hidden>
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M9 4H4v5M15 4h5v5M9 20H4v-5M15 20h5v-5"/></svg>
+        <span>Alles zeigen</span>
+      </button>
+    </section>
     <main class="inhalt" id="inhalt" tabindex="-1"></main>
   </div>
 </div>
@@ -395,6 +438,7 @@ ol.pfad .eintrag .t2 .kz2 { color: var(--akzent); }
     return '<svg width="' + g + '" height="' + g + '" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + (PFADE[id] || '<circle cx="12" cy="12" r="6"/>') + "</svg>";
   }
   var WZ_ZEICHEN = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14.5 6.5a4 4 0 0 0 5 5L12 19a2.1 2.1 0 0 1-3-3l7.5-7.5a4 4 0 0 1-2-2z"/></svg>';
+  var LUPE = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="M20 20l-4.2-4.2"/></svg>';
   var PFEIL = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg>';
   function esc(s) {
     return String(s == null ? "" : s).replace(/[&<>"']/g, function (c) {
@@ -412,12 +456,6 @@ ol.pfad .eintrag .t2 .kz2 { color: var(--akzent); }
   function bewegung() { return true; }
 
   /* ---------- Zustand ---------- */
-  var REITER = [
-    { id: "start", name: "Start" },
-    { id: "ablaeufe", name: "Abläufe", n: D.artikel.length },
-    { id: "wissen", name: "Fachwissen", n: D.wissen.length },
-    { id: "werkzeuge", name: "Werkzeuge", n: D.werkzeuge.length }
-  ];
   function leer() { return { tab: "start", kat: null, art: null, wis: null, wz: null, an: null, ab: null, sat: null }; }
   var S = leer();
   /* Adressen: #/artikel/<id>, #/wissen/<id>, #/werkzeug/<id>, #/anlass/<id> öffnen genau das –
@@ -457,6 +495,7 @@ ol.pfad .eintrag .t2 .kz2 { color: var(--akzent); }
     S = n;
     var h = "#" + hashAus(S);
     if (window.location.hash !== h) { try { window.history.pushState(null, "", h); } catch (e) { window.location.hash = h; } }
+    schublade(false);
     zeichnen(true);
   }
   function vonAdresse() {
@@ -475,165 +514,211 @@ ol.pfad .eintrag .t2 .kz2 { color: var(--akzent); }
     else if (S.tab !== "start") { gehe({ tab: "start" }); }
   }
 
-  /* ---------- Seiten ---------- */
-  function reiterHtml() {
-    return REITER.map(function (r) {
-      return '<button type="button" role="tab" data-tab="' + r.id + '" aria-selected="' + (S.tab === r.id) + '">' +
-        esc(r.name) + (r.n ? '<span class="n">' + r.n + "</span>" : "") + "</button>";
-    }).join("");
+  /* ---------- Merken auf dem Gerät: offene Zweige der Leiste, zuletzt Angesehenes ---------- */
+  function merkLesen(k, vorgabe) { try { var v = JSON.parse(window.localStorage.getItem(k)); return v == null ? vorgabe : v; } catch (e) { return vorgabe; } }
+  function merkSchreiben(k, v) { try { window.localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} }
+  var AUF = merkLesen("wiki.leiste", { anlaesse: true });
+  var ZULETZT = merkLesen("wiki.zuletzt", []).filter(function (x) { return (x.t === "a" && ART[x.id]) || (x.t === "w" && WIS[x.id]) || (x.t === "t" && WZ[x.id]); });
+  function zuletztMerken() {
+    var x = S.art ? { t: "a", id: S.art } : S.wis ? { t: "w", id: S.wis } : S.wz ? { t: "t", id: S.wz } : null;
+    if (!x) { return; }
+    ZULETZT = [x].concat(ZULETZT.filter(function (y) { return y.t !== x.t || y.id !== x.id; })).slice(0, 6);
+    merkSchreiben("wiki.zuletzt", ZULETZT);
   }
-  function katsHtml() {
-    var t = ['<div class="kopfzeile">' + (S.tab === "wissen" ? "Fachwissen nach Kategorie" : "Kategorien") + "</div>"];
-    D.kategorien.forEach(function (k) {
-      var n = S.tab === "wissen" ? wissenFuerKat(k.id).length : k.artikel.length;
-      t.push('<button type="button" class="kat" data-kat="' + k.id + '" aria-current="' + (S.kat === k.id) + '">' +
-        zeichen(k.id) + '<span class="name">' + esc(k.name) + '</span><span class="n">' + n + "</span></button>");
-    });
-    var leere = (D.gruppen || []).filter(function (g) { return !D.kategorien.some(function (k) { return k.gruppe === g.id; }); })
-      .map(function (g) { return g.name; });
-    if (leere.length) {
-      t.push('<div class="leise">' + esc(leere.length > 1 ? leere.slice(0, -1).join(", ") + " und " + leere[leere.length - 1] : leere[0]) +
-        (leere.length > 1 ? " erscheinen" : " erscheint") + ", sobald dort echte Abläufe beschrieben sind.</div>");
-    }
-    return t.join("");
+  function schublade(auf) { app.dataset.schublade = auf ? "auf" : "zu"; }
+
+  /* ---------- Bausteine ---------- */
+  var ZEICHEN_START = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 11.5L12 5l8 6.5V19a1 1 0 0 1-1 1h-4.5v-5h-5v5H5a1 1 0 0 1-1-1z"/></svg>';
+  var ZEICHEN_WISSEN = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 5.5A1.5 1.5 0 0 1 6.5 4H19v14H6.5A1.5 1.5 0 0 0 5 19.5z"/><path d="M5 19.5A1.5 1.5 0 0 0 6.5 21H19v-3"/></svg>';
+  var ZEICHEN_WEG = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="6" cy="18" r="2"/><circle cx="18" cy="6" r="2"/><path d="M8 18h6a3 3 0 0 0 0-6h-4a3 3 0 0 1 0-6h6"/></svg>';
+  function zeichenWz(g) { return WZ_ZEICHEN.replace(/width="13" height="13"/, 'width="' + (g || 16) + '" height="' + (g || 16) + '"'); }
+  /* Steht vorne ein kurzer Satzteil mit Doppelpunkt oder Gedankenstrich, wird er fett – so lässt sich eine Liste überfliegen. */
+  function fett(s) {
+    var m = /^(Unbestätigt|Nicht geprüft):\s*/i.exec(s), vor = "";
+    if (m) { vor = '<span class="unbest">' + (m[1].toLowerCase() === "unbestätigt" ? "unbestätigt" : "nicht geprüft") + "</span>"; s = s.slice(m[0].length); }
+    else if (/noch nicht bestätigt/i.test(s)) { vor = '<span class="unbest">unbestätigt</span>'; }
+    var i = s.indexOf(": "), j = s.indexOf(" — ");
+    var cut = i > 0 && i <= 48 && s.slice(0, i).indexOf(".") < 0 ? i : (j > 0 && j <= 56 ? j : -1);
+    if (cut < 0) { return vor + esc(s); }
+    var trenner = cut === i ? ":" : " —";
+    return vor + "<b>" + esc(s.slice(0, cut)) + trenner + "</b> " + esc(s.slice(cut + (cut === i ? 2 : 3)));
   }
-  function eintragA(a, rechts, mitKat) {
+  function anzahl(n, eins, viele) { return n + " " + (n === 1 ? eins : viele); }
+  function eintragA(a, rechts) {
     return '<button type="button" class="eintrag" data-art="' + a.id + '"><span class="t1">' + esc(a.name) +
-      '</span><span class="t2">' + (mitKat ? '<span class="kz2">' + esc(KAT[a.kategorie].name) + "</span> · " : "") + esc(a.wann) +
-      '</span><span class="rechts">' + (rechts || "") + PFEIL + "</span></button>";
+      '</span><span class="t2">' + esc(a.wann) + '</span><span class="rechts">' + (rechts || "") + PFEIL + "</span></button>";
   }
   function eintragW(w) {
     return '<button type="button" class="eintrag" data-wis="' + w.id + '"><span class="t1">' + esc(w.name) +
-      '</span><span class="t2">' + esc(w.kurz || "") + '</span><span class="rechts">geprüft ' + datum(w.geprueft) + PFEIL + "</span></button>";
+      '</span><span class="t2">' + esc(w.kurz || "") + '</span><span class="rechts">' + PFEIL + "</span></button>";
   }
   function eintragT(w) {
     var n = (wzNutzer[w.id] || []).length;
     return '<button type="button" class="eintrag" data-wz="' + w.id + '"><span class="t1">' + esc(w.name) +
-      '</span><span class="t2">' + esc(w.kurz || "") + '</span><span class="rechts">' + (n ? "in " + n + (n === 1 ? " Ablauf" : " Abläufen") : "") + PFEIL + "</span></button>";
+      '</span><span class="t2">' + esc(w.kurz || "") + '</span><span class="rechts">' + (n ? anzahl(n, "Ablauf", "Abläufe") : "") + PFEIL + "</span></button>";
   }
-  function krume(teile) {
-    return '<div class="krume">' + teile.map(function (t, i) {
-      var s = i ? '<span aria-hidden="true">›</span>' : "";
-      return s + (t.z ? '<button type="button" data-geh="' + esc(JSON.stringify(t.z)) + '">' + esc(t.n) + "</button>" : "<span>" + esc(t.n) + "</span>");
+  function ueber(teile) {
+    return '<div class="ueber">' + teile.map(function (t, i) {
+      var s = i ? '<span aria-hidden="true">/</span>' : "";
+      return s + (t.z ? '<button type="button" data-geh="' + esc(JSON.stringify(t.z)) + '">' + (t.i || "") + esc(t.n) + "</button>" : (t.i || "") + "<span>" + esc(t.n) + "</span>");
     }).join("") + "</div>";
   }
   function ergaenzenHtml(kat) {
     if (!EIN.ergaenzen) { return ""; }
-    return '<div class="ergaenzen" data-ergkat="' + esc(kat || "") + '"><h3>Etwas ergänzen</h3>' +
-      '<textarea id="ergtext" placeholder="Was fehlt oder stimmt so nicht? Der Sonntagslauf arbeitet es ein."></textarea>' +
-      '<div class="zeile"><button type="button" class="knopf" data-ergaenzen="1">Vormerken</button><span id="ergstand"></span></div></div>';
+    return '<div class="ergaenzen" data-ergkat="' + esc(kat || "") + '">' +
+      '<button type="button" class="ergaenzen-auf" data-ergauf="1">' + PLUS + "Fehlt etwas oder stimmt etwas nicht?</button>" +
+      '<div class="zu" data-ergteil="1"><textarea id="ergtext" placeholder="Der Sonntagslauf arbeitet es ein."></textarea>' +
+      '<div class="zeile-knopf"><button type="button" class="knopf" data-ergaenzen="1">Vormerken</button><span id="ergstand"></span></div></div></div>';
   }
+  var PLUS = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>';
   function wartetHtml() {
-    return WARTEND ? '<div class="wartet"><i></i>' + WARTEND + (WARTEND === 1 ? " Ergänzung wartet" : " Ergänzungen warten") + " auf den Sonntagslauf</div>" : "";
+    return WARTEND ? '<div class="wartet"><i></i>' + anzahl(WARTEND, "Ergänzung wartet", "Ergänzungen warten") + " auf den Sonntagslauf</div>" : "";
   }
 
-  function seiteStart() {
-    var t = [];
-    if (!D.artikel.length) {
-      return "<h1>Das Wiki ist noch leer</h1><p class=\"lead\">Sobald der Sonntagslauf Abläufe aus deinen Lösungswegen einarbeitet, stehen sie hier.</p>";
+  /* ---------- Leiste ---------- */
+  function zeile(attr, inhalt, aktiv, extra) {
+    return '<button type="button" class="zeile" ' + attr + (aktiv ? ' aria-current="page"' : "") + (extra || "") + ">" + inhalt + "</button>";
+  }
+  function teil(schl, titel, n, innen) {
+    var auf = !!AUF[schl];
+    return '<div class="baum-teil"><button type="button" class="baum-titel" data-auf="' + schl + '" aria-expanded="' + auf + '"><span class="pf">' + PFEIL_KLEIN +
+      "</span>" + esc(titel) + '<span class="n">' + n + '</span></button><div class="' + (auf ? "" : "zu") + '">' + innen + "</div></div>";
+  }
+  var PFEIL_KLEIN = '<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg>';
+  function baumHtml() {
+    var t = [zeile("data-tab=\"start\"", ZEICHEN_START + '<span class="name">Start</span>', S.tab === "start" && !S.an)];
+    if (S.an) { AUF.anlaesse = true; }
+    t.push(teil("anlaesse", "Anlässe", D.anlaesse.length, D.anlaesse.map(function (x) {
+      return zeile('data-an="' + x.id + '"', ZEICHEN_WEG + '<span class="name">' + esc(x.name) + "</span>", S.an === x.id);
+    }).join("")));
+    var abl = D.kategorien.map(function (k) {
+      var offen = !!AUF["k." + k.id] || (S.tab === "ablaeufe" && S.kat === k.id);
+      return zeile('data-kat="' + k.id + '" data-tab="ablaeufe"', zeichen(k.id) + '<span class="name">' + esc(k.name) + '</span><span class="n">' + k.artikel.length +
+        '</span><span class="pf">' + PFEIL_KLEIN + "</span>", S.tab === "ablaeufe" && S.kat === k.id && !S.art, ' aria-expanded="' + offen + '"') +
+        '<div class="unterliste' + (offen ? "" : " zu") + '">' + k.artikel.map(function (id) {
+          return zeile('data-art="' + id + '"', '<span class="name">' + esc(ART[id].name) + "</span>", S.art === id);
+        }).join("") + "</div>";
+    }).join("");
+    if (AUF.ablaeufe === undefined) { AUF.ablaeufe = true; }
+    t.push(teil("ablaeufe", "Abläufe", D.artikel.length, abl));
+    if (S.wis) { AUF.wissen = true; }
+    t.push(teil("wissen", "Fachwissen", D.wissen.length, D.wissen.map(function (w) {
+      return zeile('data-wis="' + w.id + '"', ZEICHEN_WISSEN + '<span class="name">' + esc(w.name) + "</span>", S.wis === w.id);
+    }).join("")));
+    if (S.wz) { AUF.werkzeuge = true; }
+    t.push(teil("werkzeuge", "Werkzeuge", D.werkzeuge.length, D.werkzeuge.map(function (w) {
+      return zeile('data-wz="' + w.id + '"', zeichenWz(15) + '<span class="name">' + esc(w.name) + "</span>", S.wz === w.id);
+    }).join("")));
+    var leere = (D.gruppen || []).filter(function (g) { return !D.kategorien.some(function (k) { return k.gruppe === g.id; }); })
+      .map(function (g) { return g.name; });
+    if (leere.length) {
+      t.push('<div class="leise">' + esc(leere.length > 1 ? leere.slice(0, -1).join(", ") + " und " + leere[leere.length - 1] : leere[0]) +
+        (leere.length > 1 ? " erscheinen" : " erscheint") + ", sobald dort Abläufe beschrieben sind.</div>");
     }
-    t.push("<h1>Deine Abläufe, als Nachschlagewerk</h1>");
-    t.push('<p class="lead">Was du beim Abarbeiten gelernt hast, zusammengefasst zu Schritten und Regeln. Ohne Aufgaben, ohne Namen, ohne Verlauf.</p>');
-    t.push('<div class="zahlen"><span><b>' + D.artikel.length + "</b> Abläufe</span><span><b>" + D.wissen.length +
-      "</b> Fachwissen-Seiten</span><span><b>" + D.werkzeuge.length + "</b> Werkzeuge</span><span>Stand " + datum(D.aktualisiert) + "</span></div>");
-    t.push(wartetHtml());
-    t.push('<div class="block"><h2>Was steht an?</h2><div class="kz">Der Weg durch die Abläufe für die Anlässe, die bei dir immer wieder kommen.</div><div class="anlaesse">');
-    D.anlaesse.forEach(function (x) {
-      t.push('<button type="button" class="anlass" data-an="' + x.id + '"><span class="t1">' + esc(x.name) +
-        '</span><span class="t2">' + esc(x.kurz) + '</span><span class="weg">' + x.weg.length + (x.weg.length === 1 ? " Ablauf" : " Abläufe") +
-        " · " + x.weg.map(function (a) { return esc(KAT[ART[a].kategorie].name); }).filter(function (v, i, l) { return l.indexOf(v) === i; }).join(", ") + "</span></button>");
-    });
-    t.push("</div></div>");
-    t.push('<div class="block"><h2>Kategorien</h2>');
-    D.kategorien.forEach(function (k) {
-      t.push('<div class="gruppe"><h2>' + zeichen(k.id, 18) + '<button type="button" data-kat="' + k.id + '">' + esc(k.name) +
-        '</button></h2><p class="kurz">' + esc(k.kurz) + "</p></div>");
-    });
-    t.push("</div>");
+    return t.join("");
+  }
+
+  /* ---------- Seiten ---------- */
+  function seiteStart() {
+    if (!D.artikel.length) {
+      return '<div class="start-kopf"><h1>Das Wiki ist noch leer</h1><p class="zahlen">Sobald der Sonntagslauf Abläufe einarbeitet, stehen sie hier.</p></div>';
+    }
+    var t = [];
+    t.push('<div class="start-kopf"><h1>Wie machst du das nochmal?</h1><div class="zahlen">' + anzahl(D.artikel.length, "Ablauf", "Abläufe") + " · " +
+      D.wissen.length + " Fachwissen · " + anzahl(D.werkzeuge.length, "Werkzeug", "Werkzeuge") + " · Stand " + datum(D.aktualisiert) + "</div></div>");
+    t.push('<button type="button" class="grosssuche" data-sucheauf="1">' + LUPE + "Ablauf, Fachwissen oder Werkzeug suchen<kbd>/</kbd></button>");
+    t.push('<section class="start-teil"><h2>Was steht an?</h2><div class="kacheln">' + D.anlaesse.map(function (x) {
+      return '<button type="button" class="kachel" data-an="' + x.id + '"><span class="wegzeichen">' + x.weg.map(function (a) { return zeichen(ART[a].kategorie, 15); }).join("<i></i>") +
+        '</span><span class="t1">' + esc(x.name) + '</span><span class="t2">' + anzahl(x.weg.length, "Schritt", "Schritte") + "</span></button>";
+    }).join("") + "</div></section>");
+    if (ZULETZT.length) {
+      t.push('<section class="start-teil"><h2>Zuletzt angesehen</h2><div class="zeilen start-zeilen">' + ZULETZT.slice(0, 5).map(function (x) {
+        if (x.t === "a") { return eintragA(ART[x.id], esc(KAT[ART[x.id].kategorie].name)); }
+        if (x.t === "w") { return eintragW(WIS[x.id]); }
+        return eintragT(WZ[x.id]);
+      }).join("") + "</div></section>");
+    }
+    t.push('<section class="start-teil"><h2>Bereiche</h2><div class="kacheln">' + D.kategorien.map(function (k) {
+      return '<button type="button" class="kachel" data-kat="' + k.id + '" data-tab="ablaeufe"><span class="rund-zeichen">' + zeichen(k.id, 18) +
+        '</span><span class="t1">' + esc(k.name) + '</span><span class="t2">' + anzahl(k.artikel.length, "Ablauf", "Abläufe") + " · " + wissenFuerKat(k.id).length + " Fachwissen</span></button>";
+    }).join("") + "</div></section>");
     return t.join("");
   }
   function seiteAnlass() {
     var x = AN[S.an], t = [];
-    t.push(krume([{ n: "Start", z: { tab: "start" } }, { n: x.name }]));
-    t.push("<h1>" + esc(x.name) + '</h1><p class="lead">' + esc(x.kurz) + "</p>");
-    t.push('<ol class="pfad">' + x.weg.map(function (a) { return "<li>" + eintragA(ART[a], "", true) + "</li>"; }).join("") + "</ol>");
+    t.push(ueber([{ n: "Anlass", i: ZEICHEN_WEG }]));
+    t.push("<h1>" + esc(x.name) + '</h1><p class="wann">' + esc(x.kurz) + "</p>");
+    t.push('<ol class="pfad">' + x.weg.map(function (a) { return "<li>" + eintragA(ART[a], esc(KAT[ART[a].kategorie].name)) + "</li>"; }).join("") + "</ol>");
+    t.push('<div class="fuss"><button type="button" class="knopf" data-art="' + x.weg[0] + '">Mit Schritt 1 anfangen ' + PFEIL + "</button></div>");
     return t.join("");
   }
   function seiteAblaeufe() {
     var t = [];
     if (S.kat) {
       var k = KAT[S.kat];
-      t.push(krume([{ n: "Abläufe", z: { tab: "ablaeufe" } }, { n: k.name }]));
-      t.push("<h1>" + esc(k.name) + '</h1><p class="lead">' + esc(k.kurz) + "</p>");
-      t.push('<div class="liste">' + k.artikel.map(function (id) { var a = ART[id]; return eintragA(a, stepAnz(a) + " Schritte"); }).join("") + "</div>");
+      t.push(ueber([{ n: "Abläufe", z: { tab: "ablaeufe" } }]));
+      t.push('<h1>' + esc(k.name) + '</h1><p class="wann">' + esc(k.kurz) + "</p>");
+      t.push('<div class="block"><div class="zeilen">' + k.artikel.map(function (id) { var a = ART[id]; return eintragA(a, anzahl(stepAnz(a), "Schritt", "Schritte")); }).join("") + "</div></div>");
       var w = wissenFuerKat(k.id);
-      if (w.length) { t.push('<div class="block"><h2>Fachwissen dazu</h2><div class="liste" style="margin-top:4px">' + w.map(eintragW).join("") + "</div></div>"); }
+      if (w.length) { t.push('<div class="block"><h2>Fachwissen dazu</h2><div class="zeilen">' + w.map(eintragW).join("") + "</div></div>"); }
       t.push(ergaenzenHtml(k.id));
       return t.join("");
     }
-    t.push('<h1>Abläufe</h1><p class="lead">Nach Kategorie. Jede Seite: wann du sie brauchst, die Schritte, worauf es ankommt.</p>');
+    t.push("<h1>Abläufe</h1>");
     D.kategorien.forEach(function (k) {
-      t.push('<div class="gruppe"><h2>' + zeichen(k.id, 18) + '<button type="button" data-kat="' + k.id + '">' + esc(k.name) +
-        '</button></h2><div class="liste">' + k.artikel.map(function (id) { return eintragA(ART[id]); }).join("") + "</div></div>");
+      t.push('<div class="block"><h2>' + esc(k.name) + '</h2><div class="zeilen">' + k.artikel.map(function (id) { return eintragA(ART[id]); }).join("") + "</div></div>");
     });
     return t.join("");
   }
   function wkarte(w) {
-    var t = ['<details class="wkarte" data-satw="' + w.id + '"><summary><span class="t1">' + esc(w.name) + '</span><span class="t2">' + esc(w.kurz || "") +
-      '</span><span class="pf">' + PFEIL + '</span></summary><div class="wk-inhalt">'];
+    var t = ['<details class="wkarte" data-satw="' + w.id + '"><summary class="eintrag"><span class="t1">' + esc(w.name) + '</span><span class="t2">' + esc(w.kurz || "") +
+      '</span><span class="rechts"><span class="pf">' + PFEIL + '</span></span></summary><div class="wk-inhalt">'];
     w.abschnitte.forEach(function (x) {
       if (x.titel) { t.push("<h3>" + esc(x.titel) + "</h3>"); }
-      t.push('<ul class="punkte">' + x.punkte.map(function (p) { return "<li>" + hinweisHtml(p) + "</li>"; }).join("") + "</ul>");
+      t.push('<ul class="punkte">' + x.punkte.map(function (p) { return "<li>" + fett(p) + "</li>"; }).join("") + "</ul>");
     });
-    t.push('<button type="button" class="textknopf" data-wis="' + w.id + '">Ganze Seite öffnen</button></div></details>');
+    t.push('<button type="button" class="textlink" data-wis="' + w.id + '">Ganze Seite mit Quellen öffnen</button></div></details>');
     return t.join("");
   }
-  function chipsA(ids) {
-    return '<div class="links">' + ids.map(function (v) {
-      return '<button type="button" class="chip" data-art="' + v + '">' + zeichen(ART[v].kategorie, 13) + esc(ART[v].name) + "</button>";
-    }).join("") + "</div>";
+  function weiterHtml(a) {
+    return anlaesseMit(a.id).map(function (x) {
+      var i = x.weg.indexOf(a.id), vor = x.weg[i - 1], nach = x.weg[i + 1];
+      return '<div class="weiter"><div class="weiter-kopf"><button type="button" class="textlink" data-an="' + x.id + '">' + esc(x.name) + "</button><span>Schritt " + (i + 1) + " von " + x.weg.length +
+        '</span><span class="punkte-reihe">' + x.weg.map(function (_, j) { return '<i class="' + (j <= i ? "da" : "") + '"></i>'; }).join("") + "</span></div>" +
+        '<div class="weiter-raster"><button type="button" class="weiter-karte vor" ' + (vor ? 'data-art="' + vor + '"' : "disabled") + '><span class="klein">‹ Vorher</span><span class="gross">' +
+        (vor ? esc(ART[vor].name) : "Anfang") + '</span></button><button type="button" class="weiter-karte nach" ' + (nach ? 'data-art="' + nach + '"' : "disabled") +
+        '><span class="klein">Danach ›</span><span class="gross">' + (nach ? esc(ART[nach].name) : "Geschafft") + "</span></button></div></div>";
+    }).join("");
   }
   function seiteArtikel() {
     var a = ART[S.art], k = KAT[a.kategorie], t = [];
-    t.push(krume([{ n: "Abläufe", z: { tab: "ablaeufe" } }, { n: k.name, z: { tab: "ablaeufe", kat: k.id } }, { n: a.name }]));
-    t.push("<h1>" + esc(a.name) + '</h1><p class="lead">' + esc(a.wann) + "</p>");
+    t.push(ueber([{ n: k.name, i: zeichen(k.id, 14), z: { tab: "ablaeufe", kat: k.id } }]));
+    t.push("<h1>" + esc(a.name) + '</h1><p class="wann">' + esc(a.wann) + "</p>");
+    var meta = [];
     if (a.werkzeuge.length) {
-      t.push('<div class="meta">' + a.werkzeuge.map(function (w) {
-        return '<button type="button" class="chip werkzeug" data-wz="' + w + '">' + WZ_ZEICHEN + esc(WZ[w].name) + "</button>";
-      }).join("") + "</div>");
+      meta.push('<span class="wz">' + zeichenWz(14) + '<span class="inhalt-liste">' + a.werkzeuge.map(function (w) {
+        return '<button type="button" class="textlink" data-wz="' + w + '">' + esc(WZ[w].name) + "</button>";
+      }).join("") + "</span></span>");
     }
-    if (a.abschnitte.filter(function (x) { return x.titel; }).length > 1) {
-      t.push('<div class="toc"><span>Auf dieser Seite</span>' + a.abschnitte.map(function (x, i) {
-        return x.titel ? '<button type="button" data-sprung="' + i + '">' + esc(x.titel) + "</button>" : "";
-      }).join("") + "</div>");
-    }
+    meta.push("<span>" + anzahl(stepAnz(a), "Schritt", "Schritte") + "</span>");
+    if (a.seit) { meta.push("<span>seit " + datum(a.seit) + "</span>"); }
+    t.push('<div class="meta">' + meta.join("") + "</div>");
+    var mitTitel = a.abschnitte.filter(function (x) { return x.titel; }).length;
     a.abschnitte.forEach(function (x, i) {
       t.push('<section class="abschnitt" id="ab' + i + '">');
-      if (x.titel) { t.push("<h2>" + esc(x.titel) + "</h2>"); }
+      if (x.titel) { t.push('<div class="abschnitt-kopf">' + (mitTitel > 1 ? '<span class="nr">' + (i + 1) + "</span>" : "") + "<h2>" + esc(x.titel) + "</h2></div>"); }
       if (x.intro) { t.push('<p class="intro">' + esc(x.intro) + "</p>"); }
-      if (x.schritte.length) { t.push('<ol class="schritte">' + x.schritte.map(function (s) { return "<li><span>" + hinweisHtml(s) + "</span></li>"; }).join("") + "</ol>"); }
-      if (x.hinweise.length) { t.push('<div class="achten"><h3>Worauf es ankommt</h3><ul>' + x.hinweise.map(function (h) { return "<li>" + hinweisHtml(h) + "</li>"; }).join("") + "</ul></div>"); }
-      t.push("</section>");
+      t.push('<div class="raster' + (x.hinweise.length ? " mit-notiz" : "") + '">');
+      t.push(x.schritte.length ? '<ol class="schritte">' + x.schritte.map(function (s) { return "<li><span>" + fett(s) + "</span></li>"; }).join("") + "</ol>" : "<div></div>");
+      if (x.hinweise.length) { t.push('<aside class="notiz"><h3>Worauf es ankommt</h3><ul>' + x.hinweise.map(function (h) { return "<li>" + fett(h) + "</li>"; }).join("") + "</ul></aside>"); }
+      t.push("</div></section>");
     });
-    if (a.wissen.length) {
-      t.push('<div class="block"><h2>Fachwissen dazu</h2><div class="kz">Aufklappen zum Nachlesen, mit Quelle und Prüfdatum auf der ganzen Seite.</div>' +
-        a.wissen.map(function (w) { return wkarte(WIS[w]); }).join("") + "</div>");
-    }
-    var an = anlaesseMit(a.id);
-    if (an.length) {
-      t.push('<div class="block"><h2>Gehört zu</h2><div class="anlass-nav">');
-      an.forEach(function (x) {
-        var i = x.weg.indexOf(a.id), vor = x.weg[i - 1], nach = x.weg[i + 1];
-        t.push('<div class="anlass-zeile"><span class="was"><button type="button" class="textknopf" data-an="' + x.id + '">' + esc(x.name) + '</button> <span class="wo">· Schritt ' + (i + 1) + " von " + x.weg.length +
-          '</span></span><span class="blaettern"><button type="button" ' + (vor ? 'data-art="' + vor + '" title="' + esc(ART[vor].name) + '"' : "disabled") + ">‹ " +
-          (vor ? esc(ART[vor].name) : "Anfang") + '</button><button type="button" ' + (nach ? 'data-art="' + nach + '" title="' + esc(ART[nach].name) + '"' : "disabled") + ">" +
-          (nach ? esc(ART[nach].name) : "Ende") + " ›</button></span></div>");
-      });
-      t.push("</div></div>");
-    }
+    if (a.wissen.length) { t.push('<div class="block"><h2>Fachwissen dazu</h2><div class="zeilen">' + a.wissen.map(function (w) { return wkarte(WIS[w]); }).join("") + "</div></div>"); }
+    var weiter = weiterHtml(a);
+    if (weiter) { t.push('<div class="block">' + weiter + "</div>"); }
     var siehe = (a.verwandt || []).slice();
     (rueck[a.id] || []).forEach(function (r) { if (siehe.indexOf(r) < 0) { siehe.push(r); } });
-    if (siehe.length) { t.push('<div class="block"><h2>Siehe auch</h2>' + chipsA(siehe) + "</div>"); }
+    if (siehe.length) { t.push('<div class="block"><h2>Siehe auch</h2><div class="zeilen">' + siehe.map(function (v) { return eintragA(ART[v], esc(KAT[ART[v].kategorie].name)); }).join("") + "</div></div>"); }
     t.push(ergaenzenHtml(a.kategorie));
     t.push('<div class="fuss"><span>Quelle: ' + esc((a.quelle || []).join(" · ")) + "</span><span>Stand " + datum(D.aktualisiert) + "</span></div>");
     return t.join("");
@@ -642,36 +727,31 @@ ol.pfad .eintrag .t2 .kz2 { color: var(--akzent); }
     var t = [];
     if (S.wis) {
       var w = WIS[S.wis], k = KAT[w.kategorie];
-      t.push(krume([{ n: "Fachwissen", z: { tab: "wissen" } }, { n: k.name, z: { tab: "wissen", kat: k.id } }, { n: w.name }]));
-      t.push("<h1>" + esc(w.name) + '</h1><p class="lead">' + esc(w.kurz || "") + "</p>");
-      if (w.abschnitte.length > 1) {
-        t.push('<div class="toc"><span>Auf dieser Seite</span>' + w.abschnitte.map(function (x, i) {
-          return '<button type="button" data-sprung="' + i + '">' + esc(x.titel) + "</button>";
-        }).join("") + "</div>");
-      }
+      t.push(ueber([{ n: "Fachwissen", i: ZEICHEN_WISSEN, z: { tab: "wissen" } }, { n: k.name, z: { tab: "wissen", kat: k.id } }]));
+      t.push("<h1>" + esc(w.name) + '</h1><p class="wann">' + esc(w.kurz || "") + "</p>");
       w.abschnitte.forEach(function (x, i) {
-        t.push('<section class="abschnitt" id="ab' + i + '">' + (x.titel ? "<h2>" + esc(x.titel) + "</h2>" : "") +
+        t.push('<section class="abschnitt" id="ab' + i + '">' + (x.titel ? '<div class="abschnitt-kopf"><h2>' + esc(x.titel) + "</h2></div>" : "") +
           (x.titel && x.kurz ? '<p class="intro">' + esc(x.kurz) + "</p>" : "") +
-          '<ul class="punkte">' + x.punkte.map(function (p) { return "<li>" + hinweisHtml(p) + "</li>"; }).join("") + "</ul>" +
+          '<ul class="punkte">' + x.punkte.map(function (p) { return "<li>" + fett(p) + "</li>"; }).join("") + "</ul>" +
           '<div class="beleg"><span>Quelle: ' + esc(x.quelle || "—") + "</span>" + (x.geprueft ? "<span>geprüft " + datum(x.geprueft) + "</span>" : "") + "</div></section>");
       });
       var n = wisNutzer[w.id] || [];
-      if (n.length) { t.push('<div class="block"><h2>Gebraucht in</h2>' + chipsA(n) + "</div>"); }
+      if (n.length) { t.push('<div class="block"><h2>Gebraucht in</h2><div class="zeilen">' + n.map(function (id) { return eintragA(ART[id], esc(KAT[ART[id].kategorie].name)); }).join("") + "</div></div>"); }
+      t.push(ergaenzenHtml(w.kategorie));
       return t.join("");
     }
     if (S.kat) {
       var kk = KAT[S.kat];
-      t.push(krume([{ n: "Fachwissen", z: { tab: "wissen" } }, { n: kk.name }]));
-      t.push("<h1>Fachwissen · " + esc(kk.name) + '</h1><p class="lead">Gesetz, Grenzen, Anbieterregeln, jeweils mit Quelle und Prüfdatum.</p>');
-      t.push('<div class="liste">' + wissenFuerKat(kk.id).map(eintragW).join("") + "</div>");
+      t.push(ueber([{ n: "Fachwissen", i: ZEICHEN_WISSEN, z: { tab: "wissen" } }]));
+      t.push("<h1>" + esc(kk.name) + "</h1>");
+      t.push('<div class="block"><div class="zeilen">' + wissenFuerKat(kk.id).map(eintragW).join("") + "</div></div>");
       return t.join("");
     }
-    t.push('<h1>Fachwissen</h1><p class="lead">Gesetz, Grenzen, Anbieterregeln. Zahlen immer mit Stand, jede Seite mit Quelle und Prüfdatum.</p>');
+    t.push("<h1>Fachwissen</h1>");
     D.kategorien.forEach(function (k) {
       var w = D.wissen.filter(function (x) { return x.kategorie === k.id; });
       if (!w.length) { return; }
-      t.push('<div class="gruppe"><h2>' + zeichen(k.id, 18) + '<button type="button" data-kat="' + k.id + '">' + esc(k.name) +
-        '</button></h2><div class="liste">' + w.map(eintragW).join("") + "</div></div>");
+      t.push('<div class="block"><h2>' + esc(k.name) + '</h2><div class="zeilen">' + w.map(eintragW).join("") + "</div></div>");
     });
     return t.join("");
   }
@@ -679,35 +759,37 @@ ol.pfad .eintrag .t2 .kz2 { color: var(--akzent); }
     var t = [];
     if (S.wz) {
       var w = WZ[S.wz];
-      t.push(krume([{ n: "Werkzeuge", z: { tab: "werkzeuge" } }, { n: w.name }]));
-      t.push("<h1>" + esc(w.name) + '</h1><p class="lead">' + esc(w.kurz || "") + "</p>");
-      t.push('<section class="abschnitt"><ul class="punkte">' + w.punkte.map(function (p) { return "<li>" + esc(p) + "</li>"; }).join("") + "</ul>" +
+      t.push(ueber([{ n: "Werkzeuge", i: zeichenWz(14), z: { tab: "werkzeuge" } }]));
+      t.push("<h1>" + esc(w.name) + '</h1><p class="wann">' + esc(w.kurz || "") + "</p>");
+      t.push('<section class="abschnitt"><ul class="punkte">' + w.punkte.map(function (p) { return "<li>" + fett(p) + "</li>"; }).join("") + "</ul>" +
         '<div class="beleg"><span>Quelle: ' + esc(w.quelle || "—") + "</span>" + (w.geprueft ? "<span>geprüft " + datum(w.geprueft) + "</span>" : "") + "</div></section>");
       var n = wzNutzer[w.id] || [];
-      if (n.length) { t.push('<div class="block"><h2>Gebraucht in</h2>' + chipsA(n) + "</div>"); }
+      if (n.length) { t.push('<div class="block"><h2>Gebraucht in</h2><div class="zeilen">' + n.map(function (id) { return eintragA(ART[id], esc(KAT[ART[id].kategorie].name)); }).join("") + "</div></div>"); }
       return t.join("");
     }
-    t.push('<h1>Werkzeuge</h1><p class="lead">Die Programme und Ablagen, mit denen du arbeitest, und wo sie in deinen Abläufen vorkommen.</p>');
-    t.push('<div class="liste">' + D.werkzeuge.map(eintragT).join("") + "</div>");
+    t.push("<h1>Werkzeuge</h1>");
+    t.push('<div class="block"><div class="zeilen">' + D.werkzeuge.map(eintragT).join("") + "</div></div>");
     return t.join("");
   }
 
   function nachOben() {
-    if (app.getBoundingClientRect().top >= 0) { return; }
-    window.scrollTo({ top: 0, behavior: "smooth" });
+    var r = inhalt.getBoundingClientRect();
+    if (window.scrollY > 0 && r.top < 0) { window.scrollTo({ top: 0, behavior: "smooth" }); }
   }
   var letzterSchluessel = null;
   function zeichnen(neu) {
-    $("reiter").innerHTML = reiterHtml();
-    $("kats").innerHTML = katsHtml();
-    inhalt.innerHTML = S.art ? seiteArtikel() : S.an ? seiteAnlass() : S.tab === "ablaeufe" ? seiteAblaeufe() : S.tab === "wissen" ? seiteWissen() :
-      S.tab === "werkzeuge" ? seiteWerkzeuge() : seiteStart();
+    $("baum").innerHTML = baumHtml();
+    $("leistefuss").innerHTML = "<span>Fassung " + esc(D.fassung) + " · Stand " + datum(D.aktualisiert) + "</span>" + wartetHtml();
+    var seite = S.art ? "artikel" : S.an ? "anlass" : S.tab === "ablaeufe" ? "ablaeufe" : S.tab === "wissen" ? "wissen" : S.tab === "werkzeuge" ? "werkzeuge" : "start";
+    inhalt.dataset.seite = seite;
+    inhalt.innerHTML = { artikel: seiteArtikel, anlass: seiteAnlass, ablaeufe: seiteAblaeufe, wissen: seiteWissen, werkzeuge: seiteWerkzeuge, start: seiteStart }[seite]();
     var schl = hashAus(S);
     if (neu && schl !== letzterSchluessel) {
       inhalt.classList.remove("ein"); void inhalt.offsetWidth; inhalt.classList.add("ein");
       if (letzterSchluessel !== null) { nachOben(); }
     }
     letzterSchluessel = schl;
+    zuletztMerken();
     app.dataset.tief = (S.art || S.wis || S.wz || S.an) ? "ja" : "nein";
     document.title = S.art ? ART[S.art].name + " · Persönliches Wiki" : S.wis ? WIS[S.wis].name + " · Persönliches Wiki" :
       S.wz ? WZ[S.wz].name + " · Persönliches Wiki" : S.an ? AN[S.an].name + " · Persönliches Wiki" : "Persönliches Wiki";
@@ -722,16 +804,34 @@ ol.pfad .eintrag .t2 .kz2 { color: var(--akzent); }
   }
 
   app.addEventListener("click", function (e) {
+    if (e.target.closest(".vorhang")) { schublade(false); return; }
     var b = e.target.closest("button, summary");
     if (!b || b.tagName === "SUMMARY") { return; }
+    if (b.dataset.auf) {
+      AUF[b.dataset.auf] = !AUF[b.dataset.auf]; merkSchreiben("wiki.leiste", AUF);
+      $("baum").innerHTML = baumHtml(); return;
+    }
+    if (b.dataset.kat) {
+      if (b.closest(".baum")) {
+        var schl = "k." + b.dataset.kat, war = S.tab === "ablaeufe" && S.kat === b.dataset.kat && !S.art;
+        AUF[schl] = war ? !AUF[schl] : true; merkSchreiben("wiki.leiste", AUF);
+        if (war) { $("baum").innerHTML = baumHtml(); return; }
+      }
+      gehe({ tab: b.dataset.tab === "ablaeufe" || S.tab !== "wissen" ? "ablaeufe" : "wissen", kat: b.dataset.kat }); return;
+    }
     if (b.dataset.tab) { gehe({ tab: b.dataset.tab }); return; }
-    if (b.dataset.kat) { gehe({ tab: S.tab === "wissen" ? "wissen" : "ablaeufe", kat: b.dataset.kat }); return; }
     if (b.dataset.an) { gehe({ tab: "start", an: b.dataset.an }); return; }
     if (b.dataset.art) { gehe({ art: b.dataset.art, tab: "ablaeufe", kat: ART[b.dataset.art].kategorie }); return; }
     if (b.dataset.wis) { gehe({ wis: b.dataset.wis, tab: "wissen", kat: WIS[b.dataset.wis].kategorie }); return; }
     if (b.dataset.wz) { gehe({ wz: b.dataset.wz, tab: "werkzeuge" }); return; }
     if (b.dataset.geh) { gehe(JSON.parse(b.dataset.geh)); return; }
     if (b.dataset.sprung !== undefined) { abschnittZeigen(+b.dataset.sprung); return; }
+    if (b.dataset.sucheauf) { sucheOeffnen(); return; }
+    if (b.dataset.menue) { schublade(app.dataset.schublade !== "auf"); return; }
+    if (b.dataset.ergauf) {
+      var teilEl = b.parentNode.querySelector("[data-ergteil]");
+      teilEl.classList.remove("zu"); b.classList.add("zu"); teilEl.querySelector("textarea").focus(); return;
+    }
     if (b.dataset.ergaenzen) {
       var box = b.closest(".ergaenzen"), ta = box.querySelector("textarea"), txt = ta.value.trim();
       if (!txt) { ta.focus(); return; }
@@ -740,18 +840,23 @@ ol.pfad .eintrag .t2 .kz2 { color: var(--akzent); }
       EIN.ergaenzen(txt, box.dataset.ergkat || null).then(function (meldung) {
         ta.value = ""; WARTEND++;
         stand.textContent = meldung || "Vorgemerkt. Der Sonntagslauf arbeitet es ein.";
+        $("leistefuss").innerHTML = "<span>Fassung " + esc(D.fassung) + " · Stand " + datum(D.aktualisiert) + "</span>" + wartetHtml();
       }, function () {
         stand.textContent = "Konnte nicht gespeichert werden. Der Text bleibt stehen – später nochmal versuchen.";
       }).then(function () { b.disabled = false; });
       return;
     }
-    if (b.id === "marke") { gehe({ tab: "start" }); return; }
+    if (b.id === "marke" || b.dataset.marke) { gehe({ tab: "start" }); return; }
     if (b.id === "rauszoomen") { hoch(); return; }
   });
   function abschnittZeigen(i) {
     var z = inhalt.querySelector("#ab" + i);
-    if (z) { z.scrollIntoView({ behavior: bewegung() ? "smooth" : "auto", block: "start" }); }
+    if (z) { z.scrollIntoView({ behavior: "smooth", block: "start" }); }
     if (S.art) { S.ab = i; S.sat = null; zeichnenHimmel(); }
+  }
+  function sucheOeffnen() {
+    if (window.matchMedia("(max-width: 860px)").matches) { schublade(true); }
+    $("suchfeld").focus({ preventScroll: true });
   }
 
   /* ---------- Suche ---------- */
@@ -785,7 +890,8 @@ ol.pfad .eintrag .t2 .kz2 { color: var(--akzent); }
     }).filter(Boolean).sort(function (a, b) { return b.s - a.s; }).slice(0, 8);
     trWahl = 0;
     tr.innerHTML = trListe.length ? trListe.map(function (r, i) {
-      return '<button type="button" role="option" aria-selected="' + (i === 0) + '" data-i="' + i + '"><span class="t1">' + esc(r.x.name) +
+      var z = r.x.art === "art" ? zeichen(ART[r.x.id].kategorie, 15) : r.x.art === "wis" ? ZEICHEN_WISSEN : zeichenWz(15);
+      return '<button type="button" role="option" aria-selected="' + (i === 0) + '" data-i="' + i + '">' + z + '<span class="t1">' + esc(r.x.name) +
         '</span><span class="t2">' + esc(r.x.wo) + (r.z ? " · " + esc(r.z.length > 90 ? r.z.slice(0, 88) + "…" : r.z) : "") + "</span></button>";
     }).join("") : '<div class="leer">Nichts gefunden.</div>';
     tr.hidden = false;
@@ -806,7 +912,7 @@ ol.pfad .eintrag .t2 .kz2 { color: var(--akzent); }
       trWahl = (trWahl + (e.key === "ArrowDown" ? 1 : trListe.length - 1)) % trListe.length;
       Array.prototype.forEach.call(tr.querySelectorAll("button"), function (b, i) { b.setAttribute("aria-selected", i === trWahl); });
     } else if (e.key === "Enter") { e.preventDefault(); oeffneTreffer(trWahl); }
-    else if (e.key === "Escape") { sf.value = ""; tr.hidden = true; sf.blur(); }
+    else if (e.key === "Escape") { sf.value = ""; tr.hidden = true; sf.blur(); schublade(false); }
   });
   tr.addEventListener("mousedown", function (e) { var b = e.target.closest("button"); if (b) { e.preventDefault(); oeffneTreffer(+b.dataset.i); } });
   sf.addEventListener("blur", function () { setTimeout(function () { tr.hidden = true; }, 120); });
@@ -814,8 +920,8 @@ ol.pfad .eintrag .t2 .kz2 { color: var(--akzent); }
     var ziel = (e.composedPath && e.composedPath()[0]) || e.target;
     var tag = (ziel && ziel.tagName || "").toLowerCase();
     if (tag === "input" || tag === "textarea" || tag === "select" || (ziel && ziel.isContentEditable)) { return; }
-    if (e.key === "/") { e.preventDefault(); sf.focus(); }
-    else if (e.key === "Escape") { hoch(); }
+    if (e.key === "/") { e.preventDefault(); sucheOeffnen(); }
+    else if (e.key === "Escape") { if (app.dataset.schublade === "auf") { schublade(false); } else { hoch(); } }
   });
 
   /* ====================================================================
@@ -945,7 +1051,8 @@ ol.pfad .eintrag .t2 .kz2 { color: var(--akzent); }
       return einpassen(weltBox(), 22);
     };
     fliegen();
-    var ort = ["<b>Selbstständigkeit</b>"];
+    var gruppe = F.bild && KAT[F.bild] ? (D.gruppen || []).filter(function (g) { return g.id === KAT[F.bild].gruppe; })[0] : null;
+    var ort = ["<b>" + esc(gruppe ? gruppe.name : "Wiki") + "</b>"];
     if (F.bild) { ort.push('<span class="sep">›</span>' + esc(KAT[F.bild].name)); }
     if (F.stern) { ort.push('<span class="sep">›</span>' + esc(ART[F.stern].name)); }
     if (S.art && S.ab !== null) { ort.push('<span class="sep">›</span>' + esc(ART[S.art].abschnitte[S.ab].titel || "")); }
@@ -953,6 +1060,7 @@ ol.pfad .eintrag .t2 .kz2 { color: var(--akzent); }
     if (S.an) { ort.push('<span class="sep">·</span>' + esc(AN[S.an].name)); }
     if (S.wz) { ort.push('<span class="sep">·</span>' + esc(WZ[S.wz].name) + " in " + F.hell.length + " Abläufen"); }
     $("himmelOrt").innerHTML = ort.join(" ");
+    $("himmelOrt").hidden = ort.length < 2;
     var ek = ebene();
     $("rauszoomen").hidden = !(F.bild || S.an || S.wz);
     $("rauszoomen").querySelector("span").textContent = ek === 3 ? "Zum Ablauf" : (ek === 2 || S.wis) ? "Zur Kategorie" : "Alles zeigen";
@@ -1135,7 +1243,7 @@ ol.pfad .eintrag .t2 .kz2 { color: var(--akzent); }
             ctx.strokeStyle = alpha(an ? FARBE["akzent"] : FARBE["h-stern"], ra * .9); ctx.lineWidth = 1.2;
             ctx.beginPath(); ctx.arc(tx, ty, tr2, 0, 6.283); ctx.stroke();
             if (an) { ctx.fillStyle = alpha(FARBE["akzent"], ra); ctx.fill(); }
-            if (fokus && ua > .5 && (an || hv || cam.k > artikelK() * 1.6 || S.ab === null)) {
+            if (fokus && ua > .5 && (an || hv || (B.w >= 560 && (cam.k > artikelK() * 1.6 || S.ab === null)))) {
               var rechts2 = t.dx >= 0;
               beschriften(WIS[t.w] ? WIS[t.w].name : t.w, tx + (rechts2 ? tr2 + 7 : -tr2 - 7), ty, rechts2 ? "left" : "right", an || hv ? "600" : "400", ra * (an || hv ? .95 : .6));
             }

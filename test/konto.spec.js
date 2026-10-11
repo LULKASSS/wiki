@@ -112,7 +112,7 @@ test('Ohne Sitzung nur die Anmeldung, falsches Passwort wird gemeldet @mobil', a
   await page.locator('#wpw').fill('geheim123');
   await page.locator('#wpw').press('Enter');
   await expect(page.locator('#tor')).toHaveCount(0);
-  await expect(page.locator('#inhalt h1')).toHaveText('Deine Abläufe, als Nachschlagewerk');
+  await expect(page.locator('#inhalt h1')).toHaveText('Wie machst du das nochmal?');
   expect(fehler).toEqual([]);
   await ctx.close();
 });
@@ -137,7 +137,7 @@ test('Einmal-Übernahme prüft die Datei und legt wiki/aktuell an @dunkel', asyn
   await expect(page.locator('#wpruefung')).toHaveText('Fassung 11 vom 01.10.2026 · 3 Abläufe · 2 Fachwissen-Seiten · 2 Werkzeuge · 1 Anlass');
   expect(s.zeilen.size).toBe(0);
   await page.locator('[data-wtu="uebernehmen"]').click();
-  await expect(page.locator('#inhalt h1')).toHaveText('Deine Abläufe, als Nachschlagewerk');
+  await expect(page.locator('#inhalt h1')).toHaveText('Wie machst du das nochmal?');
 
   const z = s.zeilen.get(`${NUTZER}|wiki|aktuell`);
   expect(z.daten.fassung).toBe(11);
@@ -146,7 +146,7 @@ test('Einmal-Übernahme prüft die Datei und legt wiki/aktuell an @dunkel', asyn
 
   /* Danach ist der Knopf weg */
   await page.reload();
-  await expect(page.locator('#inhalt h1')).toHaveText('Deine Abläufe, als Nachschlagewerk');
+  await expect(page.locator('#inhalt h1')).toHaveText('Wie machst du das nochmal?');
   await expect(page.locator('#tor')).toHaveCount(0);
   expect(fehler).toEqual([]);
   await ctx.close();
@@ -162,7 +162,7 @@ test('Übernahme überschreibt nie ein Wiki, das inzwischen da ist', async ({ br
   /* Währenddessen schreibt der Sonntagslauf ein Wiki */
   s.wikiAnlegen({ ...BEISPIEL, fassung: 14, aktualisiert: '2026-10-12' });
   await page.locator('[data-wtu="uebernehmen"]').click();
-  await expect(page.locator('.zahlen')).toContainText('Stand 12.10.2026');
+  await expect(page.locator('.start-kopf .zahlen')).toContainText('Stand 12.10.2026');
   expect(s.zeilen.get(`${NUTZER}|wiki|aktuell`).daten.fassung).toBe(14);
   await ctx.close();
 });
@@ -186,8 +186,9 @@ test('Etwas ergänzen schreibt nur in wiki-eingang', async ({ browser }) => {
   const ctx = await s.kontext(browser);
   await angemeldet(ctx);
   const { page } = await s.seite(ctx);
-  await expect(page.locator('.wartet')).toHaveText('1 Ergänzung wartet auf den Sonntagslauf');
+  await expect(page.locator('.leiste .wartet')).toHaveText('1 Ergänzung wartet auf den Sonntagslauf');
   await page.goto('/konto?wolke=test#/artikel/rasen-maehen');
+  await page.locator('[data-ergauf]').click();
   await page.locator('#ergtext').fill('Mulchen statt kompostieren?');
   await page.locator('[data-ergaenzen]').click();
   await expect(page.locator('#ergstand')).toHaveText('Vorgemerkt. Der Sonntagslauf arbeitet es ein.');
@@ -207,7 +208,7 @@ test('Zwei Tabs: angemeldet in einem heißt angemeldet im anderen, Abmelden in K
   const ctx = await s.kontext(browser);
   const a = await s.seite(ctx);
   await anmelden(a.page);
-  await expect(a.page.locator('#inhalt h1')).toHaveText('Deine Abläufe, als Nachschlagewerk');
+  await expect(a.page.locator('#inhalt h1')).toHaveText('Wie machst du das nochmal?');
   const b = await s.seite(ctx, '/konto?wolke=test#/wissen/mhd');
   await expect(b.page.locator('#inhalt h1')).toHaveText('Mindesthaltbarkeit');
   await expect(b.page.locator('#tor')).toHaveCount(0);
@@ -244,7 +245,7 @@ test('Ohne Anmeldung wird die Kopie gelöscht', async ({ browser }) => {
   const ctx = await s.kontext(browser);
   await angemeldet(ctx);
   const { page } = await s.seite(ctx);
-  await expect(page.locator('#inhalt h1')).toHaveText('Deine Abläufe, als Nachschlagewerk');
+  await expect(page.locator('#inhalt h1')).toHaveText('Wie machst du das nochmal?');
   expect(await page.evaluate(() => !!localStorage.getItem('wiki.kopie'))).toBe(true);
   await page.evaluate(() => window.__wikiAuthEreignis('SIGNED_OUT', null));
   await expect(page.locator('#tor[data-ansicht="anmelden"]')).toBeVisible();
@@ -258,7 +259,7 @@ test('Neue Fassung vom Sonntagslauf kommt beim Zurückkommen ins Fenster', async
   await angemeldet(ctx);
   await ctx.addInitScript(() => { window.__wikiPruefAbstand = 1; });
   const { page } = await s.seite(ctx, '/konto?wolke=test#/artikel/rasen-maehen');
-  await expect(page.locator('.zahlen, #inhalt h1').first()).toBeVisible();
+  await expect(page.locator('#inhalt h1')).toHaveText('Rasen mähen');
   /* Ohne neue Fassung passiert nichts */
   await page.evaluate(() => { window.__nichtNeu = true; document.dispatchEvent(new Event('visibilitychange')); });
   await page.waitForTimeout(300);

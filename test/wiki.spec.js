@@ -23,22 +23,23 @@ async function oeffnen(page, adresse = '', wahl = {}) {
 
 test('Startseite zeigt Zahlen, Anlässe und Kategorien @mobil @dunkel', async ({ page }) => {
   const fehler = await oeffnen(page);
-  await expect(page.locator('#inhalt h1')).toHaveText('Deine Abläufe, als Nachschlagewerk');
-  await expect(page.locator('.zahlen')).toContainText('3 Abläufe');
-  await expect(page.locator('.anlass')).toHaveCount(1);
+  await expect(page.locator('#inhalt h1')).toHaveText('Wie machst du das nochmal?');
+  await expect(page.locator('.start-kopf .zahlen')).toContainText('3 Abläufe');
+  await expect(page.locator('.kachel[data-an]')).toHaveCount(1);
+  await expect(page.locator('.kachel[data-kat]')).toHaveCount(2);
   expect(fehler).toEqual([]);
 });
 
 test('Leere Gruppen werden aus den Daten benannt', async ({ page }) => {
   await oeffnen(page);
-  await expect(page.locator('.kats .leise')).toHaveText('Freizeit erscheint, sobald dort echte Abläufe beschrieben sind.');
+  await expect(page.locator('.leiste .leise')).toHaveText('Freizeit erscheint, sobald dort Abläufe beschrieben sind.');
 });
 
 test('Kein Entwurf-Etikett und keine Klar-Einbettung', async ({ page }) => {
   await oeffnen(page);
   await expect(page.locator('.entwurf')).toHaveCount(0);
   await expect(page.locator('#app')).not.toHaveAttribute('data-klar', /.*/);
-  await expect(page.locator('.marke')).toBeVisible();
+  await expect(page.locator('#marke')).toHaveText(/Persönliches Wiki/);
 });
 
 for (const [adresse, titel] of [
@@ -55,18 +56,58 @@ for (const [adresse, titel] of [
   });
 }
 
-test('Klick schreibt die Adresse, Zurück geht zurück', async ({ page }) => {
+test('Leiste: Bereich aufklappen, Ablauf öffnen, Zurück geht zurück', async ({ page }) => {
   await oeffnen(page);
-  await page.locator('.reiter [data-tab="ablaeufe"]').click();
-  await expect(page).toHaveURL(/#\/ablaeufe$/);
-  await page.locator('.eintrag[data-art="vorrat-pruefen"]').click();
+  await page.locator('.baum .zeile[data-kat="kueche"]').click();
+  await expect(page).toHaveURL(/#\/ablaeufe\/kueche$/);
+  await expect(page.locator('#inhalt h1')).toHaveText('Küche');
+  await page.locator('.baum .zeile[data-art="vorrat-pruefen"]').click();
   await expect(page).toHaveURL(/#\/artikel\/vorrat-pruefen$/);
   await expect(page.locator('#inhalt h1')).toHaveText('Vorrat prüfen');
+  await expect(page.locator('.baum .zeile[data-art="vorrat-pruefen"]')).toHaveAttribute('aria-current', 'page');
   await page.goBack();
-  await expect(page.locator('#inhalt h1')).toHaveText('Abläufe');
+  await expect(page.locator('#inhalt h1')).toHaveText('Küche');
 });
 
-test('Suche mit / findet Text in Schritten', async ({ page }) => {
+test('Anlass: Weg ansehen und Schritt für Schritt durchgehen @mobil', async ({ page }) => {
+  await oeffnen(page);
+  await page.locator('.kachel[data-an="fruehling"]').click();
+  await expect(page.locator('#inhalt h1')).toHaveText('Frühling im Garten');
+  await expect(page.locator('ol.pfad li')).toHaveCount(2);
+  await page.getByRole('button', { name: /Mit Schritt 1 anfangen/ }).click();
+  await expect(page.locator('#inhalt h1')).toHaveText('Tomaten pflanzen');
+  await expect(page.locator('.weiter-kopf')).toContainText('Schritt 1 von 2');
+  await page.locator('.weiter-karte.nach').click();
+  await expect(page.locator('#inhalt h1')).toHaveText('Rasen mähen');
+  await expect(page.locator('.weiter-karte.nach')).toBeDisabled();
+});
+
+test('Hinweise stehen als Randnotiz neben den Schritten', async ({ page }) => {
+  await oeffnen(page, '#/artikel/rasen-maehen');
+  await expect(page.locator('.notiz li')).toHaveText(['Nicht bei Nässe mähen.']);
+  const [schritte, notiz] = await Promise.all([page.locator('ol.schritte').boundingBox(), page.locator('.notiz').boundingBox()]);
+  expect(notiz.x).toBeGreaterThan(schritte.x + schritte.width - 1);
+});
+
+test('Zuletzt angesehen auf der Startseite', async ({ page }) => {
+  await oeffnen(page, '#/artikel/vorrat-pruefen');
+  await expect(page.locator('#inhalt h1')).toHaveText('Vorrat prüfen');
+  await page.locator('#marke').click();
+  await expect(page.locator('.start-zeilen .eintrag').first()).toContainText('Vorrat prüfen');
+});
+
+test('Handy: Leiste als Schublade @mobil', async ({ page, isMobile }) => {
+  test.skip(!isMobile, 'nur Handy');
+  await oeffnen(page);
+  await expect(page.locator('.leiste')).not.toBeInViewport();
+  await page.locator('[data-menue]').click();
+  await expect(page.locator('.leiste')).toBeInViewport();
+  await page.locator('.baum .zeile[data-an="fruehling"]').click();
+  await expect(page.locator('#inhalt h1')).toHaveText('Frühling im Garten');
+  await expect(page.locator('.leiste')).not.toBeInViewport();
+});
+
+test('Suche mit / findet Text in Schritten @mobil', async ({ page }) => {
   await oeffnen(page);
   await page.keyboard.press('/');
   await page.keyboard.type('kompost');
@@ -82,6 +123,7 @@ test('Unbestätigtes ist markiert', async ({ page }) => {
 
 test('Etwas ergänzen geht an den Eingang @mobil', async ({ page }) => {
   await oeffnen(page, '#/artikel/rasen-maehen');
+  await page.locator('[data-ergauf]').click();
   await page.locator('#ergtext').fill('Mulchen statt kompostieren?');
   await page.locator('[data-ergaenzen]').click();
   await expect(page.locator('#ergstand')).toHaveText('Vorgemerkt. Der Sonntagslauf arbeitet es ein.');
