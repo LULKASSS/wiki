@@ -22,6 +22,8 @@ Supabase, dasselbe Projekt und dieselbe Tabelle wie Klar (`public.klar_dokumente
 - **Einmal-Übernahme:** Fehlt `wiki/aktuell`, zeigt die App nach der Anmeldung „Wiki übernehmen“ (Datei `wissensbaum.json`,
   geprüft: `artikel[]` da, `fassung` ≥ 11). Geschrieben wird mit `insert` und nur, wenn das Dokument dann immer noch fehlt.
 - Nicht anfassen: die Tabelle selbst (kein DDL) und Klars Dokumente (`stand`, `sicherungen`, `bilder`, `himmel`).
+- Auf dem Gerät: `wiki.kopie` im localStorage – der zuletzt geladene Stand, damit die App ohne Netz startet. Wird gelöscht,
+  sobald keine Anmeldung mehr da ist. Kommt das Fenster nach vorn, prüft die App höchstens alle zehn Minuten auf eine neue Fassung.
 
 ## Anmeldung
 - supabase-js **2.45.4** wie Klar, `storageKey: "klar.anmeldung"`. Beide Apps liegen unter `lulkasss.github.io`, also teilen sie
