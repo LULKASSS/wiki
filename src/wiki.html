@@ -1,0 +1,1265 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Persönliches Wiki</title>
+<meta name="theme-color" content="#f0f0f2" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#141416" media="(prefers-color-scheme: dark)">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icon-180.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Wiki">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+html, body { margin: 0; background: var(--leinwand); color: var(--ink); }
+body { padding-top: env(safe-area-inset-top, 0px); padding-bottom: env(safe-area-inset-bottom, 0px); }
+.marke { white-space: nowrap; flex-shrink: 0; }
+@media (max-width: 820px) { .marke { font-size: 15px; } .suche { flex: 1 1 auto; } }
+
+:root {
+  color-scheme: light;
+  --anzeige: "Geist", "IBM Plex Sans", system-ui, sans-serif;
+  --text: "IBM Plex Sans", "Segoe UI", system-ui, -apple-system, sans-serif;
+  --leinwand: #f0f0f2;
+  --panel: #ffffff;
+  --panel2: #f5f5f8;
+  --ink: #17171b;
+  --ink2: #50505a;
+  --grau: #6b6b74;
+  --linie: #e4e4ea;
+  --linie2: #ececf1;
+  --akzent: #6a52a3;
+  --akzent-weich: #efecf8;
+  --akzent-text: #ffffff;
+  --ocker: #985210;
+  --ocker-weich: #fbeddd;
+  --pille: #17171b;
+  --pille-text: #ffffff;
+  --schatten: 0 10px 26px -14px rgba(18,18,28,.22), 0 2px 5px -2px rgba(18,18,28,.05);
+  /* Himmel */
+  --h-oben: #e9e7f1;
+  --h-unten: #f2f2f5;
+  --h-stern: #2b2838;
+  --h-linie: rgba(106,82,163,.42);
+  --h-staub: rgba(60,50,90,.28);
+  --h-schrift: #3a3648;
+  --h-leise: rgba(58,54,72,.55);
+  --r: 16px;
+  --ease: cubic-bezier(.23, 1, .32, 1);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --leinwand: #141416; --panel: #1c1c20; --panel2: #232328;
+    --ink: #ededf1; --ink2: #b2b2ba; --grau: #8e8e97;
+    --linie: #2f2f35; --linie2: #27272c;
+    --akzent: #a48ddb; --akzent-weich: #2a2540; --akzent-text: #14141a;
+    --ocker: #e0a469; --ocker-weich: #33281c;
+    --pille: #ededf1; --pille-text: #141416;
+    --schatten: 0 12px 28px -16px rgba(0,0,0,.7);
+    --h-oben: #121116; --h-unten: #1a1920;
+    --h-stern: #f1eefb; --h-linie: rgba(180,160,235,.40); --h-staub: rgba(220,210,255,.35);
+    --h-schrift: #e8e4f6; --h-leise: rgba(232,228,246,.5);
+  }
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --leinwand: #141416; --panel: #1c1c20; --panel2: #232328;
+  --ink: #ededf1; --ink2: #b2b2ba; --grau: #8e8e97;
+  --linie: #2f2f35; --linie2: #27272c;
+  --akzent: #a48ddb; --akzent-weich: #2a2540; --akzent-text: #14141a;
+  --ocker: #e0a469; --ocker-weich: #33281c;
+  --pille: #ededf1; --pille-text: #141416;
+  --schatten: 0 12px 28px -16px rgba(0,0,0,.7);
+  --h-oben: #121116; --h-unten: #1a1920;
+  --h-stern: #f1eefb; --h-linie: rgba(180,160,235,.40); --h-staub: rgba(220,210,255,.35);
+  --h-schrift: #e8e4f6; --h-leise: rgba(232,228,246,.5);
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+:root { display: block; background: var(--leinwand); color: var(--ink); font-family: var(--text); font-size: 14.5px; line-height: 1.55; -webkit-font-smoothing: antialiased; }
+button { font: inherit; color: inherit; cursor: pointer; }
+a { color: inherit; }
+:focus-visible { outline: 2px solid var(--akzent); outline-offset: 2px; border-radius: 8px; }
+
+.app { max-width: 1180px; margin: 0 auto; padding-inline: 16px; padding-block: 10px 64px;
+  display: flex; flex-direction: column; gap: 12px; }
+
+/* ---------- Kopf ---------- */
+.kopf { display: flex; align-items: center; gap: 12px; min-height: 40px; }
+.marke { display: flex; align-items: center; gap: 9px; background: none; border: 0; padding: 4px 6px 4px 2px;
+  font-family: var(--anzeige); font-weight: 600; font-size: 16px; letter-spacing: -.01em; }
+.marke svg { color: var(--akzent); }
+.suche { margin-left: auto; position: relative; flex: 0 1 320px; min-width: 0; }
+.suche input { width: 100%; height: 36px; border-radius: 99px; border: 1px solid var(--linie);
+  background: var(--panel); color: var(--ink); padding: 0 14px 0 36px; font: inherit; font-size: 14px; }
+.suche input:focus { outline: none; border-color: var(--akzent); }
+.suche svg { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--grau); pointer-events: none; }
+.suche kbd { position: absolute; right: 11px; top: 50%; transform: translateY(-50%); font: 500 11px var(--text);
+  color: var(--grau); border: 1px solid var(--linie); border-radius: 5px; padding: 0 5px; pointer-events: none; }
+.treffer { position: absolute; top: 42px; right: 0; left: 0; min-width: 300px; z-index: 30; background: var(--panel);
+  border-radius: 14px; box-shadow: var(--schatten); border: 1px solid var(--linie); padding: 6px; max-height: 60vh; overflow: auto; }
+.treffer button { display: flex; flex-direction: column; gap: 1px; width: 100%; text-align: left; background: none; border: 0;
+  padding: 8px 10px; border-radius: 10px; }
+.treffer button[aria-selected="true"], .treffer button:hover { background: var(--panel2); }
+.treffer .t1 { font-weight: 500; }
+.treffer .t2 { font-size: 12.5px; color: var(--grau); }
+.treffer .leer { padding: 10px; color: var(--grau); font-size: 13px; }
+
+/* ---------- Himmel ---------- */
+.grund { position: fixed; inset: 0; width: 100%; height: 100%; display: block; z-index: 0; pointer-events: none; }
+.app { position: relative; z-index: 1; }
+.himmel { position: relative; height: 270px; transition: height .55s var(--ease); cursor: default;
+  -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
+.himmel[data-zeiger="ja"] { cursor: pointer; }
+.app[data-tief="ja"] .himmel { height: 230px; }
+.himmel-ort { position: absolute; left: 14px; bottom: 12px; display: flex; align-items: center; gap: 6px; max-width: calc(100% - 160px); white-space: nowrap; overflow: hidden;
+  font-size: 12.5px; color: var(--h-schrift); pointer-events: none; }
+.himmel-ort b { font-weight: 600; }
+.himmel-ort .sep { opacity: .45; }
+.himmel-knopf { position: absolute; right: 12px; bottom: 10px; height: 30px; padding: 0 12px; border-radius: 99px;
+  border: 1px solid color-mix(in srgb, var(--h-schrift) 18%, transparent); background: color-mix(in srgb, var(--h-unten) 70%, transparent);
+  color: var(--h-schrift); font-size: 12.5px; display: flex; align-items: center; gap: 6px; backdrop-filter: blur(6px);
+  transition: opacity .25s var(--ease); }
+.himmel-knopf[hidden] { display: none; }
+
+/* ---------- Reiter ---------- */
+.reiter { display: flex; gap: 4px; padding: 4px; background: var(--panel); border-radius: 99px; align-self: flex-start;
+  box-shadow: var(--schatten); max-width: 100%; overflow-x: auto; scrollbar-width: none; }
+.reiter button { border: 0; background: none; height: 34px; padding: 0 16px; border-radius: 99px; color: var(--ink2);
+  font-weight: 500; white-space: nowrap; display: flex; align-items: center; gap: 7px;
+  transition: background .2s var(--ease), color .2s var(--ease); }
+.reiter button .n { font-size: 12px; color: var(--grau); font-variant-numeric: tabular-nums; }
+.reiter button[aria-selected="true"] { background: var(--pille); color: var(--pille-text); }
+.reiter button[aria-selected="true"] .n { color: color-mix(in srgb, var(--pille-text) 60%, transparent); }
+
+/* ---------- Körper ---------- */
+.koerper { display: grid; grid-template-columns: 236px minmax(0, 1fr); gap: 14px; align-items: start; }
+.kats { position: sticky; top: 12px; background: var(--panel); border-radius: var(--r); box-shadow: var(--schatten);
+  padding: 8px; display: flex; flex-direction: column; gap: 2px; }
+.kats .kopfzeile { font-size: 12px; color: var(--grau); padding: 6px 10px 4px; }
+.kat { display: flex; align-items: center; gap: 10px; width: 100%; text-align: left; border: 0; background: none;
+  padding: 8px 10px; border-radius: 11px; color: var(--ink2); }
+.kat svg { flex-shrink: 0; color: var(--grau); }
+.kat .name { flex: 1; min-width: 0; }
+.kat .n { font-size: 12px; color: var(--grau); font-variant-numeric: tabular-nums; }
+.kat[aria-current="true"] { background: var(--akzent-weich); color: var(--ink); font-weight: 500; }
+.kat[aria-current="true"] svg { color: var(--akzent); }
+.kats .leise { font-size: 12px; color: var(--grau); padding: 8px 10px 4px; line-height: 1.45; }
+
+.inhalt { background: var(--panel); border-radius: var(--r); box-shadow: var(--schatten); padding: 28px 32px 30px; min-width: 0; }
+.inhalt.ein { animation: ein .32s var(--ease); }
+@keyframes ein { from { opacity: .35; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+
+/* ---------- Typo im Inhalt ---------- */
+.krume { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; font-size: 12.5px; color: var(--grau); margin-bottom: 10px; }
+.krume button { border: 0; background: none; padding: 0; color: var(--grau); }
+.krume button:hover { color: var(--akzent); }
+h1 { font-family: var(--anzeige); font-weight: 600; font-size: 28px; line-height: 1.2; letter-spacing: -.02em; margin: 0;
+  text-wrap: balance; }
+h2 { font-family: var(--anzeige); font-weight: 600; font-size: 18px; letter-spacing: -.01em; margin: 0; text-wrap: balance; }
+h3 { font-family: var(--anzeige); font-weight: 600; font-size: 15px; margin: 0; }
+.lead { font-size: 16.5px; color: var(--ink2); margin: 8px 0 0; max-width: 62ch; line-height: 1.5; }
+.meta { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 14px; }
+.chip { display: inline-flex; align-items: center; gap: 6px; height: 28px; padding: 0 11px; border-radius: 99px;
+  background: var(--panel2); border: 1px solid var(--linie2); font-size: 12.5px; color: var(--ink2); }
+button.chip:hover { border-color: var(--akzent); color: var(--ink); }
+.chip.werkzeug svg { color: var(--grau); }
+
+.toc { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 18px; padding-top: 14px; border-top: 1px solid var(--linie2); }
+.toc span { font-size: 12px; color: var(--grau); margin-right: 4px; align-self: center; }
+.toc button { border: 0; background: none; padding: 3px 8px; border-radius: 8px; font-size: 13px; color: var(--ink2); }
+.toc button:hover { background: var(--panel2); color: var(--ink); }
+
+.abschnitt { margin-top: 26px; display: flex; flex-direction: column; gap: 10px; scroll-margin-top: 16px; }
+.abschnitt .intro { margin: 0; color: var(--ink2); max-width: 64ch; }
+ol.schritte { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 0; counter-reset: s; max-width: 70ch; }
+ol.schritte li { counter-increment: s; display: grid; grid-template-columns: 28px 1fr; gap: 10px; padding: 7px 0; position: relative; }
+ol.schritte li::before { content: counter(s); width: 24px; height: 24px; border-radius: 50%; background: var(--akzent-weich);
+  color: var(--akzent); font: 600 12px var(--anzeige); display: flex; align-items: center; justify-content: center;
+  font-variant-numeric: tabular-nums; margin-top: 1px; }
+ol.schritte li:not(:last-child)::after { content: ""; position: absolute; left: 11.5px; top: 33px; bottom: -3px; width: 1px; background: var(--linie); }
+.achten { background: var(--panel2); border-radius: 14px; padding: 12px 16px; max-width: 70ch; }
+.achten h3 { font-size: 13px; color: var(--grau); font-weight: 500; font-family: var(--text); margin-bottom: 4px; }
+.achten ul { margin: 0; padding-left: 18px; display: flex; flex-direction: column; gap: 5px; }
+.achten li::marker { color: var(--akzent); }
+.unbest { display: inline-block; font-size: 11px; font-weight: 600; color: var(--ocker); background: var(--ocker-weich);
+  border-radius: 99px; padding: 0 7px; margin-right: 6px; vertical-align: 1px; }
+
+.block { margin-top: 30px; padding-top: 18px; border-top: 1px solid var(--linie2); display: flex; flex-direction: column; gap: 10px; }
+.block > .kz { font-size: 12.5px; color: var(--grau); }
+details.wkarte { border: 1px solid var(--linie); border-radius: 14px; background: var(--panel); overflow: hidden; }
+details.wkarte summary { list-style: none; cursor: pointer; padding: 11px 14px; display: grid; grid-template-columns: 1fr auto; gap: 2px 12px; }
+details.wkarte summary::-webkit-details-marker { display: none; }
+details.wkarte summary .t1 { font-weight: 500; }
+details.wkarte summary .t2 { grid-column: 1; font-size: 13px; color: var(--grau); }
+details.wkarte summary .pf { grid-row: 1 / span 2; grid-column: 2; align-self: center; color: var(--grau); transition: transform .25s var(--ease); }
+details.wkarte[open] summary .pf { transform: rotate(90deg); }
+details.wkarte .wk-inhalt { padding: 0 14px 14px; display: flex; flex-direction: column; gap: 10px; }
+.punkte { margin: 0; padding-left: 18px; display: flex; flex-direction: column; gap: 5px; max-width: 70ch; }
+.punkte li::marker { color: var(--akzent); }
+.beleg { font-size: 12px; color: var(--grau); display: flex; flex-wrap: wrap; gap: 4px 12px; }
+.textknopf { border: 0; background: none; padding: 0; color: var(--akzent); font-size: 13px; font-weight: 500; align-self: flex-start; }
+
+.anlass-nav { display: flex; flex-direction: column; gap: 8px; }
+.anlass-zeile { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; background: var(--panel2); border-radius: 12px; padding: 8px 10px 8px 14px; }
+.anlass-zeile .was { flex: 1; min-width: 140px; font-size: 13.5px; }
+.anlass-zeile .was b { font-weight: 600; }
+.anlass-zeile .wo { color: var(--grau); font-size: 12.5px; font-variant-numeric: tabular-nums; }
+.blaettern { display: flex; gap: 6px; }
+.blaettern button { height: 30px; padding: 0 11px; border-radius: 99px; border: 1px solid var(--linie); background: var(--panel);
+  font-size: 12.5px; color: var(--ink2); max-width: 220px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.blaettern button:disabled { opacity: .35; cursor: default; }
+.blaettern button:not(:disabled):hover { border-color: var(--akzent); color: var(--ink); }
+.links { display: flex; flex-wrap: wrap; gap: 6px; }
+.fuss { margin-top: 26px; font-size: 12px; color: var(--grau); display: flex; flex-wrap: wrap; gap: 4px 14px; }
+
+/* ---------- Listen ---------- */
+.liste { display: flex; flex-direction: column; margin-top: 16px; }
+.eintrag { display: grid; grid-template-columns: 1fr auto; gap: 2px 14px; text-align: left; width: 100%; border: 0; background: none;
+  padding: 13px 14px; border-radius: 12px; }
+.eintrag + .eintrag { border-top: 1px solid var(--linie2); }
+.eintrag:hover { background: var(--panel2); }
+.eintrag:hover + .eintrag { border-top-color: transparent; }
+.eintrag .t1 { font-weight: 500; }
+.eintrag .t2 { grid-column: 1; font-size: 13px; color: var(--grau); }
+.eintrag .rechts { grid-row: 1 / span 2; grid-column: 2; align-self: center; font-size: 12px; color: var(--grau); display: flex; gap: 10px; align-items: center; }
+.gruppe { margin-top: 26px; }
+.gruppe:first-of-type { margin-top: 18px; }
+.gruppe h2 { display: flex; align-items: center; gap: 9px; }
+.gruppe h2 svg { color: var(--akzent); }
+.gruppe h2 button { border: 0; background: none; padding: 0; font: inherit; }
+.gruppe h2 button:hover { color: var(--akzent); }
+.gruppe .kurz { margin: 3px 0 0 27px; font-size: 13px; color: var(--grau); }
+.gruppe .liste { margin-top: 6px; }
+
+.anlaesse { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 10px; margin-top: 14px; }
+.anlass { text-align: left; border: 1px solid var(--linie); background: var(--panel); border-radius: 14px; padding: 14px 15px;
+  display: flex; flex-direction: column; gap: 8px; transition: border-color .2s var(--ease); }
+.anlass:hover { border-color: var(--akzent); }
+.anlass .t1 { font-family: var(--anzeige); font-weight: 600; font-size: 15px; }
+.anlass .t2 { font-size: 13px; color: var(--grau); }
+.anlass .weg { display: flex; flex-wrap: wrap; gap: 4px; align-items: center; font-size: 12px; color: var(--ink2); }
+.anlass .weg i { font-style: normal; color: var(--grau); }
+.zahlen { display: flex; flex-wrap: wrap; gap: 6px 18px; margin-top: 10px; font-size: 13px; color: var(--grau); }
+.zahlen b { color: var(--ink); font-family: var(--anzeige); font-weight: 600; font-variant-numeric: tabular-nums; }
+.hinweisbox { margin-top: 26px; border: 1px dashed var(--linie); border-radius: 14px; padding: 12px 15px; font-size: 13px; color: var(--grau); }
+
+/* ---------- Schmal ---------- */
+@media (max-width: 820px) {
+  .koerper { grid-template-columns: minmax(0, 1fr); }
+  .kats { position: static; flex-direction: row; overflow-x: auto; scrollbar-width: none; padding: 5px; border-radius: 99px; gap: 2px; }
+  .kats .kopfzeile, .kats .leise { display: none; }
+  .kat { width: auto; white-space: nowrap; border-radius: 99px; padding: 7px 12px; }
+  .kat .n { display: none; }
+  .inhalt { padding: 20px 18px 22px; }
+  h1 { font-size: 23px; }
+  .lead { font-size: 15px; }
+  .himmel { height: 230px; }
+  .app[data-tief="ja"] .himmel { height: 200px; }
+  .himmel-ort { display: none; }
+  .suche { flex-basis: 180px; }
+  .suche kbd { display: none; }
+  .reiter { align-self: stretch; }
+  .reiter button { flex: 1; justify-content: center; padding: 0 10px; }
+  .reiter button .n { display: none; }
+  .treffer { left: auto; width: min(92vw, 360px); }
+}
+
+/* ---------- Pfad (Anlass) ---------- */
+ol.pfad { list-style: none; margin: 18px 0 0; padding: 0; display: flex; flex-direction: column; counter-reset: p; }
+ol.pfad li { counter-increment: p; display: grid; grid-template-columns: 30px 1fr; gap: 8px; position: relative; }
+ol.pfad li::before { content: counter(p); width: 26px; height: 26px; margin-top: 12px; border-radius: 50%; background: var(--akzent-weich);
+  color: var(--akzent); font: 600 12px var(--anzeige); display: flex; align-items: center; justify-content: center; }
+ol.pfad li:not(:last-child)::after { content: ""; position: absolute; left: 12.5px; top: 42px; bottom: -8px; width: 1px; background: var(--linie); }
+ol.pfad .eintrag { border-top: 0 !important; }
+ol.pfad .eintrag .t2 .kz2 { color: var(--akzent); }
+
+/* ---------- Ergänzen ---------- */
+.ergaenzen { margin-top: 26px; border-top: 1px solid var(--linie2); padding-top: 14px; display: flex; flex-direction: column; gap: 8px; }
+.ergaenzen textarea { width: 100%; min-height: 84px; resize: vertical; border-radius: 12px; border: 1px solid var(--linie); background: var(--panel2);
+  color: var(--ink); font: inherit; padding: 10px 12px; }
+.ergaenzen textarea:focus { outline: none; border-color: var(--akzent); }
+.ergaenzen .zeile { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; font-size: 12.5px; color: var(--grau); }
+.knopf { height: 32px; padding: 0 14px; border-radius: 99px; border: 0; background: var(--pille); color: var(--pille-text); font-weight: 500; font-size: 13px; }
+.wartet { margin-top: 14px; font-size: 13px; color: var(--grau); display: flex; align-items: center; gap: 8px; }
+.wartet i { width: 7px; height: 7px; border-radius: 50%; background: var(--ocker); display: inline-block; }
+
+
+</style>
+</head>
+<body>
+<canvas class="grund" id="grund" aria-hidden="true"></canvas>
+<div class="app" id="app">
+  <header class="kopf">
+    <button type="button" class="marke" id="marke" aria-label="Zur Startseite">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" aria-hidden="true"><path d="M12 2.8l2.3 6.1 6.5.3-5.1 4 1.8 6.3L12 15.9l-5.5 3.6 1.8-6.3-5.1-4 6.5-.3z"/></svg>
+      Persönliches Wiki
+    </button>
+    <div class="suche">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="M20 20l-4.2-4.2"/></svg>
+      <input id="suchfeld" type="search" placeholder="Im Wiki suchen" autocomplete="off" aria-label="Im Wiki suchen">
+      <kbd>/</kbd>
+      <div class="treffer" id="treffer" hidden></div>
+    </div>
+  </header>
+
+  <section class="himmel" id="band" aria-label="Sternenkarte">
+    <div class="himmel-ort" id="himmelOrt"></div>
+    <button type="button" class="himmel-knopf" id="rauszoomen" hidden>
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M9 4H4v5M15 4h5v5M9 20H4v-5M15 20h5v-5"/></svg>
+      <span>Alles zeigen</span>
+    </button>
+  </section>
+
+  <nav class="reiter" id="reiter" role="tablist" aria-label="Bereiche"></nav>
+
+  <div class="koerper">
+    <aside class="kats" id="kats" aria-label="Kategorien"></aside>
+    <main class="inhalt" id="inhalt" tabindex="-1"></main>
+  </div>
+</div>
+
+<script>
+  function wikiProgramm(document, window, requestAnimationFrame, ResizeObserver) {
+  "use strict";
+  var EIN = window.__daten || {};
+  var D = EIN.baum || {};
+  ["kategorien", "artikel", "wissen", "werkzeuge", "anlaesse"].forEach(function (k) { if (!Array.isArray(D[k])) { D[k] = []; } });
+  var WARTEND = EIN.wartend || 0;
+  var $ = function (id) { return document.getElementById(id); };
+  var app = $("app"), inhalt = $("inhalt");
+
+  /* ---------- Verzeichnisse ---------- */
+  var KAT = {}, ART = {}, WIS = {}, WZ = {}, AN = {};
+  D.kategorien.forEach(function (k) { KAT[k.id] = k; });
+  D.artikel.forEach(function (a) { ART[a.id] = a; });
+  D.wissen.forEach(function (w) { WIS[w.id] = w; });
+  D.werkzeuge.forEach(function (w) { WZ[w.id] = w; });
+  D.anlaesse.forEach(function (a) { AN[a.id] = a; });
+  var rueck = {}, wisNutzer = {}, wzNutzer = {};
+  D.artikel.forEach(function (a) {
+    (a.verwandt || []).forEach(function (v) { (rueck[v] = rueck[v] || []).push(a.id); });
+    (a.wissen || []).forEach(function (w) { (wisNutzer[w] = wisNutzer[w] || []).push(a.id); });
+    (a.werkzeuge || []).forEach(function (w) { (wzNutzer[w] = wzNutzer[w] || []).push(a.id); });
+  });
+  function wissenFuerKat(k) {
+    return D.wissen.filter(function (w) {
+      if (w.kategorie === k) { return true; }
+      return (wisNutzer[w.id] || []).some(function (a) { return ART[a].kategorie === k; });
+    });
+  }
+  function anlaesseMit(aid) { return D.anlaesse.filter(function (x) { return x.weg.indexOf(aid) >= 0; }); }
+  function stepAnz(a) { return a.abschnitte.reduce(function (s, x) { return s + x.schritte.length; }, 0); }
+
+  /* ---------- Zeichen ---------- */
+  var PFADE = {
+    beratung: '<circle cx="8.5" cy="8" r="3"/><circle cx="16.5" cy="9" r="2.5"/><path d="M3.5 19c.6-3.2 2.6-5 5-5s4.4 1.8 5 5"/><path d="M14.2 14.3c.7-.3 1.5-.5 2.3-.5 2 0 3.6 1.5 4 4.2"/>',
+    schreiben: '<rect x="3.5" y="5.5" width="17" height="13" rx="2.5"/><path d="M4.5 7l7.5 6 7.5-6"/>',
+    bav: '<path d="M3.5 9.5L12 4.5l8.5 5"/><path d="M5.5 10v8M9.8 10v8M14.2 10v8M18.5 10v8"/><path d="M3.5 19.5h17"/>',
+    schadenfall: '<path d="M12 3.5l7 2.8v5.2c0 4.3-3 7.4-7 9-4-1.6-7-4.7-7-9V6.3z"/><path d="M12 8v4.5M12 15.5v.5"/>',
+    vertraege: '<path d="M4 18.5c2.2 0 2.8-3.5 4.5-3.5s1 2.2 2.6 2.2 1.8-2.4 3.4-2.4 1.4 1.8 2.5 1.8"/><path d="M13.5 4.5l5 5-7 7H6.5v-5z"/>',
+    wechsel: '<path d="M4 8.5h14M14.5 5l3.5 3.5-3.5 3.5"/><path d="M20 15.5H6M9.5 12L6 15.5 9.5 19"/>'
+  };
+  function zeichen(id, g) {
+    g = g || 16;
+    return '<svg width="' + g + '" height="' + g + '" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + (PFADE[id] || '<circle cx="12" cy="12" r="6"/>') + "</svg>";
+  }
+  var WZ_ZEICHEN = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14.5 6.5a4 4 0 0 0 5 5L12 19a2.1 2.1 0 0 1-3-3l7.5-7.5a4 4 0 0 1-2-2z"/></svg>';
+  var PFEIL = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg>';
+  function esc(s) {
+    return String(s == null ? "" : s).replace(/[&<>"']/g, function (c) {
+      return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c];
+    });
+  }
+  function datum(iso) { return iso ? iso.split("-").reverse().join(".") : ""; }
+  function hinweisHtml(h) {
+    var m = /^(Unbestätigt|Nicht geprüft):\s*/i.exec(h);
+    if (m) { return '<span class="unbest">' + (m[1].toLowerCase() === "unbestätigt" ? "unbestätigt" : "nicht geprüft") + "</span>" + esc(h.slice(m[0].length)); }
+    if (/noch nicht bestätigt/i.test(h)) { return '<span class="unbest">unbestätigt</span>' + esc(h); }
+    return esc(h);
+  }
+  /* Lukas will die Bewegung immer – „Bewegung reduzieren“ wird bewusst nicht beachtet. */
+  function bewegung() { return true; }
+
+  /* ---------- Zustand ---------- */
+  var REITER = [
+    { id: "start", name: "Start" },
+    { id: "ablaeufe", name: "Abläufe", n: D.artikel.length },
+    { id: "wissen", name: "Fachwissen", n: D.wissen.length },
+    { id: "werkzeuge", name: "Werkzeuge", n: D.werkzeuge.length }
+  ];
+  function leer() { return { tab: "start", kat: null, art: null, wis: null, wz: null, an: null, ab: null, sat: null }; }
+  var S = leer();
+  /* Adressen: #/artikel/<id>, #/wissen/<id>, #/werkzeug/<id>, #/anlass/<id> öffnen genau das –
+     so verlinkt Klar hierher. Dazu #/ablaeufe[/<kategorie>], #/fachwissen[/<kategorie>], #/werkzeuge. */
+  var TAB_PFAD = { ablaeufe: "ablaeufe", wissen: "fachwissen", werkzeuge: "werkzeuge" };
+  function hashAus(s) {
+    if (s.art) { return "/artikel/" + s.art; }
+    if (s.wis) { return "/wissen/" + s.wis; }
+    if (s.wz) { return "/werkzeug/" + s.wz; }
+    if (s.an) { return "/anlass/" + s.an; }
+    if (s.kat) { return "/" + (s.tab === "wissen" ? "fachwissen" : "ablaeufe") + "/" + s.kat; }
+    return "/" + (TAB_PFAD[s.tab] || "");
+  }
+  /* Alte Adressen aus dem Artifact (#a.<id>, #w.<id> …) werden weiter verstanden. */
+  var ALT = { a: "artikel", w: "wissen", t: "werkzeug", n: "anlass", k: "ablaeufe", wk: "fachwissen" };
+  function zustandAus(h) {
+    h = (h || "").replace(/^#/, "");
+    try { h = decodeURIComponent(h); } catch (e) {}
+    var z = leer(), m = /^(a|w|t|n|k|wk)\.(.+)$/.exec(h);
+    if (m) { h = "/" + ALT[m[1]] + "/" + m[2]; }
+    else if (h === "ablaeufe" || h === "wissen" || h === "werkzeuge") { h = "/" + TAB_PFAD[h]; }
+    m = /^\/([a-z]+)(?:\/(.+))?$/.exec(h) || [];
+    var art = m[1], id = m[2];
+    if (art === "artikel" && ART[id]) { z.tab = "ablaeufe"; z.art = id; z.kat = ART[id].kategorie; }
+    else if (art === "wissen" && WIS[id]) { z.tab = "wissen"; z.wis = id; z.kat = WIS[id].kategorie; }
+    else if (art === "werkzeug" && WZ[id]) { z.tab = "werkzeuge"; z.wz = id; }
+    else if (art === "anlass" && AN[id]) { z.tab = "start"; z.an = id; }
+    else if (art === "ablaeufe") { z.tab = "ablaeufe"; if (KAT[id]) { z.kat = id; } }
+    else if (art === "fachwissen") { z.tab = "wissen"; if (KAT[id]) { z.kat = id; } }
+    else if (art === "werkzeuge") { z.tab = "werkzeuge"; }
+    return z;
+  }
+  function gehe(z) {
+    var n = leer();
+    Object.keys(z).forEach(function (k) { n[k] = z[k]; });
+    if (!n.tab) { n.tab = "start"; }
+    S = n;
+    var h = "#" + hashAus(S);
+    if (window.location.hash !== h) { try { window.history.pushState(null, "", h); } catch (e) { window.location.hash = h; } }
+    zeichnen(true);
+  }
+  function vonAdresse() {
+    if (window.location.hash === "#" + hashAus(S)) { return; }
+    S = zustandAus(window.location.hash); zeichnen(true);
+  }
+  window.addEventListener("popstate", vonAdresse);
+  window.addEventListener("hashchange", vonAdresse);
+  /* Eine Ebene hoch — für Esc, den Knopf im Himmel und den Klick ins Leere. */
+  function hoch() {
+    if (S.ab !== null || S.sat) { S.ab = null; S.sat = null; zeichnenHimmel(); return; }
+    if (S.art || S.wis) { gehe({ tab: S.tab, kat: S.kat }); }
+    else if (S.wz) { gehe({ tab: "werkzeuge" }); }
+    else if (S.an) { gehe({ tab: "start" }); }
+    else if (S.kat) { gehe({ tab: S.tab }); }
+    else if (S.tab !== "start") { gehe({ tab: "start" }); }
+  }
+
+  /* ---------- Seiten ---------- */
+  function reiterHtml() {
+    return REITER.map(function (r) {
+      return '<button type="button" role="tab" data-tab="' + r.id + '" aria-selected="' + (S.tab === r.id) + '">' +
+        esc(r.name) + (r.n ? '<span class="n">' + r.n + "</span>" : "") + "</button>";
+    }).join("");
+  }
+  function katsHtml() {
+    var t = ['<div class="kopfzeile">' + (S.tab === "wissen" ? "Fachwissen nach Kategorie" : "Kategorien") + "</div>"];
+    D.kategorien.forEach(function (k) {
+      var n = S.tab === "wissen" ? wissenFuerKat(k.id).length : k.artikel.length;
+      t.push('<button type="button" class="kat" data-kat="' + k.id + '" aria-current="' + (S.kat === k.id) + '">' +
+        zeichen(k.id) + '<span class="name">' + esc(k.name) + '</span><span class="n">' + n + "</span></button>");
+    });
+    var leere = (D.gruppen || []).filter(function (g) { return !D.kategorien.some(function (k) { return k.gruppe === g.id; }); })
+      .map(function (g) { return g.name; });
+    if (leere.length) {
+      t.push('<div class="leise">' + esc(leere.length > 1 ? leere.slice(0, -1).join(", ") + " und " + leere[leere.length - 1] : leere[0]) +
+        (leere.length > 1 ? " erscheinen" : " erscheint") + ", sobald dort echte Abläufe beschrieben sind.</div>");
+    }
+    return t.join("");
+  }
+  function eintragA(a, rechts, mitKat) {
+    return '<button type="button" class="eintrag" data-art="' + a.id + '"><span class="t1">' + esc(a.name) +
+      '</span><span class="t2">' + (mitKat ? '<span class="kz2">' + esc(KAT[a.kategorie].name) + "</span> · " : "") + esc(a.wann) +
+      '</span><span class="rechts">' + (rechts || "") + PFEIL + "</span></button>";
+  }
+  function eintragW(w) {
+    return '<button type="button" class="eintrag" data-wis="' + w.id + '"><span class="t1">' + esc(w.name) +
+      '</span><span class="t2">' + esc(w.kurz || "") + '</span><span class="rechts">geprüft ' + datum(w.geprueft) + PFEIL + "</span></button>";
+  }
+  function eintragT(w) {
+    var n = (wzNutzer[w.id] || []).length;
+    return '<button type="button" class="eintrag" data-wz="' + w.id + '"><span class="t1">' + esc(w.name) +
+      '</span><span class="t2">' + esc(w.kurz || "") + '</span><span class="rechts">' + (n ? "in " + n + (n === 1 ? " Ablauf" : " Abläufen") : "") + PFEIL + "</span></button>";
+  }
+  function krume(teile) {
+    return '<div class="krume">' + teile.map(function (t, i) {
+      var s = i ? '<span aria-hidden="true">›</span>' : "";
+      return s + (t.z ? '<button type="button" data-geh="' + esc(JSON.stringify(t.z)) + '">' + esc(t.n) + "</button>" : "<span>" + esc(t.n) + "</span>");
+    }).join("") + "</div>";
+  }
+  function ergaenzenHtml(kat) {
+    if (!EIN.ergaenzen) { return ""; }
+    return '<div class="ergaenzen" data-ergkat="' + esc(kat || "") + '"><h3>Etwas ergänzen</h3>' +
+      '<textarea id="ergtext" placeholder="Was fehlt oder stimmt so nicht? Der Sonntagslauf arbeitet es ein."></textarea>' +
+      '<div class="zeile"><button type="button" class="knopf" data-ergaenzen="1">Vormerken</button><span id="ergstand"></span></div></div>';
+  }
+  function wartetHtml() {
+    return WARTEND ? '<div class="wartet"><i></i>' + WARTEND + (WARTEND === 1 ? " Ergänzung wartet" : " Ergänzungen warten") + " auf den Sonntagslauf</div>" : "";
+  }
+
+  function seiteStart() {
+    var t = [];
+    if (!D.artikel.length) {
+      return "<h1>Das Wiki ist noch leer</h1><p class=\"lead\">Sobald der Sonntagslauf Abläufe aus deinen Lösungswegen einarbeitet, stehen sie hier.</p>";
+    }
+    t.push("<h1>Deine Abläufe, als Nachschlagewerk</h1>");
+    t.push('<p class="lead">Was du beim Abarbeiten gelernt hast, zusammengefasst zu Schritten und Regeln. Ohne Aufgaben, ohne Namen, ohne Verlauf.</p>');
+    t.push('<div class="zahlen"><span><b>' + D.artikel.length + "</b> Abläufe</span><span><b>" + D.wissen.length +
+      "</b> Fachwissen-Seiten</span><span><b>" + D.werkzeuge.length + "</b> Werkzeuge</span><span>Stand " + datum(D.aktualisiert) + "</span></div>");
+    t.push(wartetHtml());
+    t.push('<div class="block"><h2>Was steht an?</h2><div class="kz">Der Weg durch die Abläufe für die Anlässe, die bei dir immer wieder kommen.</div><div class="anlaesse">');
+    D.anlaesse.forEach(function (x) {
+      t.push('<button type="button" class="anlass" data-an="' + x.id + '"><span class="t1">' + esc(x.name) +
+        '</span><span class="t2">' + esc(x.kurz) + '</span><span class="weg">' + x.weg.length + (x.weg.length === 1 ? " Ablauf" : " Abläufe") +
+        " · " + x.weg.map(function (a) { return esc(KAT[ART[a].kategorie].name); }).filter(function (v, i, l) { return l.indexOf(v) === i; }).join(", ") + "</span></button>");
+    });
+    t.push("</div></div>");
+    t.push('<div class="block"><h2>Kategorien</h2>');
+    D.kategorien.forEach(function (k) {
+      t.push('<div class="gruppe"><h2>' + zeichen(k.id, 18) + '<button type="button" data-kat="' + k.id + '">' + esc(k.name) +
+        '</button></h2><p class="kurz">' + esc(k.kurz) + "</p></div>");
+    });
+    t.push("</div>");
+    return t.join("");
+  }
+  function seiteAnlass() {
+    var x = AN[S.an], t = [];
+    t.push(krume([{ n: "Start", z: { tab: "start" } }, { n: x.name }]));
+    t.push("<h1>" + esc(x.name) + '</h1><p class="lead">' + esc(x.kurz) + "</p>");
+    t.push('<ol class="pfad">' + x.weg.map(function (a) { return "<li>" + eintragA(ART[a], "", true) + "</li>"; }).join("") + "</ol>");
+    return t.join("");
+  }
+  function seiteAblaeufe() {
+    var t = [];
+    if (S.kat) {
+      var k = KAT[S.kat];
+      t.push(krume([{ n: "Abläufe", z: { tab: "ablaeufe" } }, { n: k.name }]));
+      t.push("<h1>" + esc(k.name) + '</h1><p class="lead">' + esc(k.kurz) + "</p>");
+      t.push('<div class="liste">' + k.artikel.map(function (id) { var a = ART[id]; return eintragA(a, stepAnz(a) + " Schritte"); }).join("") + "</div>");
+      var w = wissenFuerKat(k.id);
+      if (w.length) { t.push('<div class="block"><h2>Fachwissen dazu</h2><div class="liste" style="margin-top:4px">' + w.map(eintragW).join("") + "</div></div>"); }
+      t.push(ergaenzenHtml(k.id));
+      return t.join("");
+    }
+    t.push('<h1>Abläufe</h1><p class="lead">Nach Kategorie. Jede Seite: wann du sie brauchst, die Schritte, worauf es ankommt.</p>');
+    D.kategorien.forEach(function (k) {
+      t.push('<div class="gruppe"><h2>' + zeichen(k.id, 18) + '<button type="button" data-kat="' + k.id + '">' + esc(k.name) +
+        '</button></h2><div class="liste">' + k.artikel.map(function (id) { return eintragA(ART[id]); }).join("") + "</div></div>");
+    });
+    return t.join("");
+  }
+  function wkarte(w) {
+    var t = ['<details class="wkarte" data-satw="' + w.id + '"><summary><span class="t1">' + esc(w.name) + '</span><span class="t2">' + esc(w.kurz || "") +
+      '</span><span class="pf">' + PFEIL + '</span></summary><div class="wk-inhalt">'];
+    w.abschnitte.forEach(function (x) {
+      if (x.titel) { t.push("<h3>" + esc(x.titel) + "</h3>"); }
+      t.push('<ul class="punkte">' + x.punkte.map(function (p) { return "<li>" + hinweisHtml(p) + "</li>"; }).join("") + "</ul>");
+    });
+    t.push('<button type="button" class="textknopf" data-wis="' + w.id + '">Ganze Seite öffnen</button></div></details>');
+    return t.join("");
+  }
+  function chipsA(ids) {
+    return '<div class="links">' + ids.map(function (v) {
+      return '<button type="button" class="chip" data-art="' + v + '">' + zeichen(ART[v].kategorie, 13) + esc(ART[v].name) + "</button>";
+    }).join("") + "</div>";
+  }
+  function seiteArtikel() {
+    var a = ART[S.art], k = KAT[a.kategorie], t = [];
+    t.push(krume([{ n: "Abläufe", z: { tab: "ablaeufe" } }, { n: k.name, z: { tab: "ablaeufe", kat: k.id } }, { n: a.name }]));
+    t.push("<h1>" + esc(a.name) + '</h1><p class="lead">' + esc(a.wann) + "</p>");
+    if (a.werkzeuge.length) {
+      t.push('<div class="meta">' + a.werkzeuge.map(function (w) {
+        return '<button type="button" class="chip werkzeug" data-wz="' + w + '">' + WZ_ZEICHEN + esc(WZ[w].name) + "</button>";
+      }).join("") + "</div>");
+    }
+    if (a.abschnitte.filter(function (x) { return x.titel; }).length > 1) {
+      t.push('<div class="toc"><span>Auf dieser Seite</span>' + a.abschnitte.map(function (x, i) {
+        return x.titel ? '<button type="button" data-sprung="' + i + '">' + esc(x.titel) + "</button>" : "";
+      }).join("") + "</div>");
+    }
+    a.abschnitte.forEach(function (x, i) {
+      t.push('<section class="abschnitt" id="ab' + i + '">');
+      if (x.titel) { t.push("<h2>" + esc(x.titel) + "</h2>"); }
+      if (x.intro) { t.push('<p class="intro">' + esc(x.intro) + "</p>"); }
+      if (x.schritte.length) { t.push('<ol class="schritte">' + x.schritte.map(function (s) { return "<li><span>" + hinweisHtml(s) + "</span></li>"; }).join("") + "</ol>"); }
+      if (x.hinweise.length) { t.push('<div class="achten"><h3>Worauf es ankommt</h3><ul>' + x.hinweise.map(function (h) { return "<li>" + hinweisHtml(h) + "</li>"; }).join("") + "</ul></div>"); }
+      t.push("</section>");
+    });
+    if (a.wissen.length) {
+      t.push('<div class="block"><h2>Fachwissen dazu</h2><div class="kz">Aufklappen zum Nachlesen, mit Quelle und Prüfdatum auf der ganzen Seite.</div>' +
+        a.wissen.map(function (w) { return wkarte(WIS[w]); }).join("") + "</div>");
+    }
+    var an = anlaesseMit(a.id);
+    if (an.length) {
+      t.push('<div class="block"><h2>Gehört zu</h2><div class="anlass-nav">');
+      an.forEach(function (x) {
+        var i = x.weg.indexOf(a.id), vor = x.weg[i - 1], nach = x.weg[i + 1];
+        t.push('<div class="anlass-zeile"><span class="was"><button type="button" class="textknopf" data-an="' + x.id + '">' + esc(x.name) + '</button> <span class="wo">· Schritt ' + (i + 1) + " von " + x.weg.length +
+          '</span></span><span class="blaettern"><button type="button" ' + (vor ? 'data-art="' + vor + '" title="' + esc(ART[vor].name) + '"' : "disabled") + ">‹ " +
+          (vor ? esc(ART[vor].name) : "Anfang") + '</button><button type="button" ' + (nach ? 'data-art="' + nach + '" title="' + esc(ART[nach].name) + '"' : "disabled") + ">" +
+          (nach ? esc(ART[nach].name) : "Ende") + " ›</button></span></div>");
+      });
+      t.push("</div></div>");
+    }
+    var siehe = (a.verwandt || []).slice();
+    (rueck[a.id] || []).forEach(function (r) { if (siehe.indexOf(r) < 0) { siehe.push(r); } });
+    if (siehe.length) { t.push('<div class="block"><h2>Siehe auch</h2>' + chipsA(siehe) + "</div>"); }
+    t.push(ergaenzenHtml(a.kategorie));
+    t.push('<div class="fuss"><span>Quelle: ' + esc((a.quelle || []).join(" · ")) + "</span><span>Stand " + datum(D.aktualisiert) + "</span></div>");
+    return t.join("");
+  }
+  function seiteWissen() {
+    var t = [];
+    if (S.wis) {
+      var w = WIS[S.wis], k = KAT[w.kategorie];
+      t.push(krume([{ n: "Fachwissen", z: { tab: "wissen" } }, { n: k.name, z: { tab: "wissen", kat: k.id } }, { n: w.name }]));
+      t.push("<h1>" + esc(w.name) + '</h1><p class="lead">' + esc(w.kurz || "") + "</p>");
+      if (w.abschnitte.length > 1) {
+        t.push('<div class="toc"><span>Auf dieser Seite</span>' + w.abschnitte.map(function (x, i) {
+          return '<button type="button" data-sprung="' + i + '">' + esc(x.titel) + "</button>";
+        }).join("") + "</div>");
+      }
+      w.abschnitte.forEach(function (x, i) {
+        t.push('<section class="abschnitt" id="ab' + i + '">' + (x.titel ? "<h2>" + esc(x.titel) + "</h2>" : "") +
+          (x.titel && x.kurz ? '<p class="intro">' + esc(x.kurz) + "</p>" : "") +
+          '<ul class="punkte">' + x.punkte.map(function (p) { return "<li>" + hinweisHtml(p) + "</li>"; }).join("") + "</ul>" +
+          '<div class="beleg"><span>Quelle: ' + esc(x.quelle || "—") + "</span>" + (x.geprueft ? "<span>geprüft " + datum(x.geprueft) + "</span>" : "") + "</div></section>");
+      });
+      var n = wisNutzer[w.id] || [];
+      if (n.length) { t.push('<div class="block"><h2>Gebraucht in</h2>' + chipsA(n) + "</div>"); }
+      return t.join("");
+    }
+    if (S.kat) {
+      var kk = KAT[S.kat];
+      t.push(krume([{ n: "Fachwissen", z: { tab: "wissen" } }, { n: kk.name }]));
+      t.push("<h1>Fachwissen · " + esc(kk.name) + '</h1><p class="lead">Gesetz, Grenzen, Anbieterregeln, jeweils mit Quelle und Prüfdatum.</p>');
+      t.push('<div class="liste">' + wissenFuerKat(kk.id).map(eintragW).join("") + "</div>");
+      return t.join("");
+    }
+    t.push('<h1>Fachwissen</h1><p class="lead">Gesetz, Grenzen, Anbieterregeln. Zahlen immer mit Stand, jede Seite mit Quelle und Prüfdatum.</p>');
+    D.kategorien.forEach(function (k) {
+      var w = D.wissen.filter(function (x) { return x.kategorie === k.id; });
+      if (!w.length) { return; }
+      t.push('<div class="gruppe"><h2>' + zeichen(k.id, 18) + '<button type="button" data-kat="' + k.id + '">' + esc(k.name) +
+        '</button></h2><div class="liste">' + w.map(eintragW).join("") + "</div></div>");
+    });
+    return t.join("");
+  }
+  function seiteWerkzeuge() {
+    var t = [];
+    if (S.wz) {
+      var w = WZ[S.wz];
+      t.push(krume([{ n: "Werkzeuge", z: { tab: "werkzeuge" } }, { n: w.name }]));
+      t.push("<h1>" + esc(w.name) + '</h1><p class="lead">' + esc(w.kurz || "") + "</p>");
+      t.push('<section class="abschnitt"><ul class="punkte">' + w.punkte.map(function (p) { return "<li>" + esc(p) + "</li>"; }).join("") + "</ul>" +
+        '<div class="beleg"><span>Quelle: ' + esc(w.quelle || "—") + "</span>" + (w.geprueft ? "<span>geprüft " + datum(w.geprueft) + "</span>" : "") + "</div></section>");
+      var n = wzNutzer[w.id] || [];
+      if (n.length) { t.push('<div class="block"><h2>Gebraucht in</h2>' + chipsA(n) + "</div>"); }
+      return t.join("");
+    }
+    t.push('<h1>Werkzeuge</h1><p class="lead">Die Programme und Ablagen, mit denen du arbeitest, und wo sie in deinen Abläufen vorkommen.</p>');
+    t.push('<div class="liste">' + D.werkzeuge.map(eintragT).join("") + "</div>");
+    return t.join("");
+  }
+
+  function nachOben() {
+    if (app.getBoundingClientRect().top >= 0) { return; }
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+  var letzterSchluessel = null;
+  function zeichnen(neu) {
+    $("reiter").innerHTML = reiterHtml();
+    $("kats").innerHTML = katsHtml();
+    inhalt.innerHTML = S.art ? seiteArtikel() : S.an ? seiteAnlass() : S.tab === "ablaeufe" ? seiteAblaeufe() : S.tab === "wissen" ? seiteWissen() :
+      S.tab === "werkzeuge" ? seiteWerkzeuge() : seiteStart();
+    var schl = hashAus(S);
+    if (neu && schl !== letzterSchluessel) {
+      inhalt.classList.remove("ein"); void inhalt.offsetWidth; inhalt.classList.add("ein");
+      if (letzterSchluessel !== null) { nachOben(); }
+    }
+    letzterSchluessel = schl;
+    app.dataset.tief = (S.art || S.wis || S.wz || S.an) ? "ja" : "nein";
+    document.title = S.art ? ART[S.art].name + " · Persönliches Wiki" : S.wis ? WIS[S.wis].name + " · Persönliches Wiki" :
+      S.wz ? WZ[S.wz].name + " · Persönliches Wiki" : S.an ? AN[S.an].name + " · Persönliches Wiki" : "Persönliches Wiki";
+    Array.prototype.forEach.call(inhalt.querySelectorAll("details.wkarte"), function (d) {
+      d.addEventListener("toggle", function () {
+        if (d.open) { S.sat = d.dataset.satw; S.ab = null; }
+        else if (S.sat === d.dataset.satw) { S.sat = null; }
+        zeichnenHimmel();
+      });
+    });
+    zeichnenHimmel();
+  }
+
+  app.addEventListener("click", function (e) {
+    var b = e.target.closest("button, summary");
+    if (!b || b.tagName === "SUMMARY") { return; }
+    if (b.dataset.tab) { gehe({ tab: b.dataset.tab }); return; }
+    if (b.dataset.kat) { gehe({ tab: S.tab === "wissen" ? "wissen" : "ablaeufe", kat: b.dataset.kat }); return; }
+    if (b.dataset.an) { gehe({ tab: "start", an: b.dataset.an }); return; }
+    if (b.dataset.art) { gehe({ art: b.dataset.art, tab: "ablaeufe", kat: ART[b.dataset.art].kategorie }); return; }
+    if (b.dataset.wis) { gehe({ wis: b.dataset.wis, tab: "wissen", kat: WIS[b.dataset.wis].kategorie }); return; }
+    if (b.dataset.wz) { gehe({ wz: b.dataset.wz, tab: "werkzeuge" }); return; }
+    if (b.dataset.geh) { gehe(JSON.parse(b.dataset.geh)); return; }
+    if (b.dataset.sprung !== undefined) { abschnittZeigen(+b.dataset.sprung); return; }
+    if (b.dataset.ergaenzen) {
+      var box = b.closest(".ergaenzen"), ta = box.querySelector("textarea"), txt = ta.value.trim();
+      if (!txt) { ta.focus(); return; }
+      var stand = box.querySelector("#ergstand");
+      b.disabled = true; stand.textContent = "Wird gespeichert …";
+      EIN.ergaenzen(txt, box.dataset.ergkat || null).then(function (meldung) {
+        ta.value = ""; WARTEND++;
+        stand.textContent = meldung || "Vorgemerkt. Der Sonntagslauf arbeitet es ein.";
+      }, function () {
+        stand.textContent = "Konnte nicht gespeichert werden. Der Text bleibt stehen – später nochmal versuchen.";
+      }).then(function () { b.disabled = false; });
+      return;
+    }
+    if (b.id === "marke") { gehe({ tab: "start" }); return; }
+    if (b.id === "rauszoomen") { hoch(); return; }
+  });
+  function abschnittZeigen(i) {
+    var z = inhalt.querySelector("#ab" + i);
+    if (z) { z.scrollIntoView({ behavior: bewegung() ? "smooth" : "auto", block: "start" }); }
+    if (S.art) { S.ab = i; S.sat = null; zeichnenHimmel(); }
+  }
+
+  /* ---------- Suche ---------- */
+  var INDEX = [];
+  D.artikel.forEach(function (a) {
+    var t = [a.wann];
+    a.abschnitte.forEach(function (x) { t = t.concat([x.titel || "", x.intro || ""], x.schritte, x.hinweise); });
+    INDEX.push({ art: "art", id: a.id, name: a.name, wo: KAT[a.kategorie].name, text: t.filter(Boolean) });
+  });
+  D.wissen.forEach(function (w) {
+    var t = [w.kurz || ""];
+    w.abschnitte.forEach(function (x) { t = t.concat([x.titel || "", x.kurz || ""], x.punkte); });
+    INDEX.push({ art: "wis", id: w.id, name: w.name, wo: "Fachwissen", text: t.filter(Boolean) });
+  });
+  D.werkzeuge.forEach(function (w) { INDEX.push({ art: "wz", id: w.id, name: w.name, wo: "Werkzeug", text: [w.kurz || ""].concat(w.punkte) }); });
+  function norm(s) { return String(s).toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, ""); }
+  var sf = $("suchfeld"), tr = $("treffer"), trWahl = 0, trListe = [];
+  function suchen() {
+    var q = norm(sf.value.trim());
+    if (!q) { tr.hidden = true; return; }
+    var w = q.split(/\s+/);
+    trListe = INDEX.map(function (x) {
+      var nm = norm(x.name), score = 0, zeile = "";
+      for (var i = 0; i < w.length; i++) {
+        if (nm.indexOf(w[i]) >= 0) { score += 3; continue; }
+        var f = x.text.filter(function (z) { return norm(z).indexOf(w[i]) >= 0; });
+        if (!f.length) { return null; }
+        score += 1; zeile = zeile || f[0];
+      }
+      return { x: x, s: score, z: zeile };
+    }).filter(Boolean).sort(function (a, b) { return b.s - a.s; }).slice(0, 8);
+    trWahl = 0;
+    tr.innerHTML = trListe.length ? trListe.map(function (r, i) {
+      return '<button type="button" role="option" aria-selected="' + (i === 0) + '" data-i="' + i + '"><span class="t1">' + esc(r.x.name) +
+        '</span><span class="t2">' + esc(r.x.wo) + (r.z ? " · " + esc(r.z.length > 90 ? r.z.slice(0, 88) + "…" : r.z) : "") + "</span></button>";
+    }).join("") : '<div class="leer">Nichts gefunden.</div>';
+    tr.hidden = false;
+  }
+  function oeffneTreffer(i) {
+    var r = trListe[i]; if (!r) { return; }
+    sf.value = ""; tr.hidden = true; sf.blur();
+    if (r.x.art === "art") { gehe({ art: r.x.id, tab: "ablaeufe", kat: ART[r.x.id].kategorie }); }
+    else if (r.x.art === "wis") { gehe({ wis: r.x.id, tab: "wissen", kat: WIS[r.x.id].kategorie }); }
+    else { gehe({ wz: r.x.id, tab: "werkzeuge" }); }
+  }
+  sf.addEventListener("input", suchen);
+  sf.addEventListener("focus", suchen);
+  sf.addEventListener("keydown", function (e) {
+    e.stopPropagation();
+    if (e.key === "ArrowDown" || e.key === "ArrowUp") {
+      e.preventDefault(); if (!trListe.length) { return; }
+      trWahl = (trWahl + (e.key === "ArrowDown" ? 1 : trListe.length - 1)) % trListe.length;
+      Array.prototype.forEach.call(tr.querySelectorAll("button"), function (b, i) { b.setAttribute("aria-selected", i === trWahl); });
+    } else if (e.key === "Enter") { e.preventDefault(); oeffneTreffer(trWahl); }
+    else if (e.key === "Escape") { sf.value = ""; tr.hidden = true; sf.blur(); }
+  });
+  tr.addEventListener("mousedown", function (e) { var b = e.target.closest("button"); if (b) { e.preventDefault(); oeffneTreffer(+b.dataset.i); } });
+  sf.addEventListener("blur", function () { setTimeout(function () { tr.hidden = true; }, 120); });
+  document.addEventListener("keydown", function (e) {
+    var ziel = (e.composedPath && e.composedPath()[0]) || e.target;
+    var tag = (ziel && ziel.tagName || "").toLowerCase();
+    if (tag === "input" || tag === "textarea" || tag === "select" || (ziel && ziel.isContentEditable)) { return; }
+    if (e.key === "/") { e.preventDefault(); sf.focus(); }
+    else if (e.key === "Escape") { hoch(); }
+  });
+
+  /* ====================================================================
+     Der Himmel liegt hinter der ganzen Seite. Oben im Band stehen die
+     Sternbilder — eins je Kategorie, unten die Quelle, darüber die Abläufe,
+     um jeden Ablauf seine Abschnitte und sein Fachwissen. Je kleinteiliger
+     das Ziel, desto näher fliegt die Kamera. Dahinter ein Sternenfeld, das
+     bei jedem Flug an einem vorbeizieht.
+     ==================================================================== */
+  var cv = $("grund"), ctx = cv.getContext("2d"), band = $("band");
+  var VW = 0, VH = 0, DPR = 1, B = { x: 0, y: 0, w: 0, h: 0 };
+  var FARBE = {};
+  function farbenLesen() {
+    var cs = window.getComputedStyle(document.documentElement);
+    ["h-oben", "h-unten", "h-stern", "h-linie", "h-staub", "h-schrift", "h-leise", "akzent", "leinwand"].forEach(function (n) { FARBE[n] = cs.getPropertyValue("--" + n).trim(); });
+    anfordern();
+  }
+  window.__wb = { farbenLesen: farbenLesen };
+  window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", farbenLesen);
+
+  function zufall(seed) { var s = 0; for (var i = 0; i < seed.length; i++) { s = (s * 31 + seed.charCodeAt(i)) >>> 0; } return function () { s = (s * 1664525 + 1013904223) >>> 0; return s / 4294967296; }; }
+  var KURZ = { beratung: "Termine", schreiben: "Mails", bav: "bAV", schadenfall: "Schäden", vertraege: "Anträge", wechsel: "Wechsel" };
+  var BILDER = [], STERNE = {}, QUER = [], ABST = 54, breitLayout = null;
+
+  function sternbildBauen(k) {
+    var r = zufall(k.id), sterne = [], seite = r() < .5 ? -1 : 1;
+    k.artikel.forEach(function (id, i) {
+      var a = ART[id], n = stepAnz(a);
+      var x = (i === 0 ? seite * (6 + r() * 10) : seite * (24 + r() * 30));
+      var y = -(ABST + 8 + i * ABST + r() * 10);
+      var aussen = x >= 0 ? 1 : -1;
+      seite = -seite;
+      /* Abschnitte fächern nach außen, Fachwissen nach innen. */
+      var abs = [];
+      a.abschnitte.forEach(function (x2, j) { if (x2.titel) { abs.push({ i: j, name: x2.titel }); } });
+      abs.forEach(function (u, j) {
+        var f = abs.length === 1 ? 0 : (j / (abs.length - 1) - .5);
+        var ang = (aussen > 0 ? 0 : Math.PI) + aussen * f * 1.9;
+        u.dx = Math.cos(ang) * 15; u.dy = Math.sin(ang) * 15 - 2;
+      });
+      var sat = (a.wissen || []).map(function (w, j, l) {
+        var f = l.length === 1 ? 0 : (j / (l.length - 1) - .5);
+        var ang = (aussen > 0 ? Math.PI : 0) - aussen * f * 1.5;
+        return { w: w, dx: Math.cos(ang) * 13, dy: Math.sin(ang) * 13 + 3 };
+      });
+      sterne.push({ id: id, lx: x, ly: y, aussen: aussen, r: 2.4 + Math.min(n, 16) * .17, abs: abs, sat: sat });
+    });
+    var minX = -20, maxX = 20, minY = -20;
+    sterne.forEach(function (s) { minX = Math.min(minX, s.lx - 24); maxX = Math.max(maxX, s.lx + 24); minY = Math.min(minY, s.ly - 24); });
+    return { id: k.id, k: k, sterne: sterne, box: { x0: minX, x1: maxX, y0: minY, y1: 34 } };
+  }
+  function anordnen() {
+    var breit = B.w >= 700;
+    ABST = breit ? 54 : 44;
+    var POS = breit
+      ? [[-560, 30], [-330, -60], [-110, 40], [110, -50], [330, 35], [560, -40]]
+      : [[-300, -160], [0, -180], [300, -150], [-300, 170], [0, 150], [300, 180]];
+    STERNE = {};
+    BILDER = D.kategorien.map(function (k, i) {
+      var b = sternbildBauen(k), p = POS[i % POS.length];
+      var cx = (b.box.x0 + b.box.x1) / 2, cy = (b.box.y0 + b.box.y1) / 2;
+      b.ox = p[0] - cx; b.oy = p[1] - cy;
+      b.sterne.forEach(function (s) { s.x = s.lx + b.ox; s.y = s.ly + b.oy; s.bild = b; STERNE[s.id] = s; });
+      b.qx = b.ox; b.qy = b.oy;
+      b.welt = { x0: b.box.x0 + b.ox, x1: b.box.x1 + b.ox, y0: b.box.y0 + b.oy, y1: b.box.y1 + b.oy };
+      return b;
+    });
+    QUER = [];
+    D.artikel.forEach(function (a) {
+      (a.verwandt || []).forEach(function (v) { if (ART[v] && ART[v].kategorie !== a.kategorie && a.id < v) { QUER.push([a.id, v]); } });
+    });
+    breitLayout = breit;
+  }
+  function bildNach(id) { for (var i = 0; i < BILDER.length; i++) { if (BILDER[i].id === id) { return BILDER[i]; } } return BILDER[0]; }
+  function weltBox() {
+    var b = { x0: 1e9, x1: -1e9, y0: 1e9, y1: -1e9 };
+    BILDER.forEach(function (x) { b.x0 = Math.min(b.x0, x.welt.x0); b.x1 = Math.max(b.x1, x.welt.x1); b.y0 = Math.min(b.y0, x.welt.y0); b.y1 = Math.max(b.y1, x.welt.y1 + 16); });
+    return b;
+  }
+  function einpassen(b, rand, maxK) {
+    var unten = 30, bw = b.x1 - b.x0, bh = b.y1 - b.y0;
+    var k = Math.min((B.w - 2 * rand) / bw, (B.h - 2 * rand - unten) / bh);
+    if (maxK) { k = Math.min(k, maxK); }
+    return { x: (b.x0 + b.x1) / 2, y: (b.y0 + b.y1) / 2 + unten / 2 / k, k: k };
+  }
+
+  /* Die Ebenen: Übersicht → Kategorie → Ablauf → Abschnitt oder Fachwissen. */
+  var cam = { x: 0, y: 0, k: 1 }, flug = null, zielFn = null, hover = null;
+  var F = { bild: null, stern: null, hell: null, pfad: null };
+  function ebene() {
+    if (S.art && (S.ab !== null || S.sat)) { return 3; }
+    if (S.art) { return 2; }
+    if (F.bild) { return 1; }
+    return 0;
+  }
+  function artikelK() {
+    var bk = einpassen(bildNach(F.bild).welt, 16, 3);
+    return Math.max(bk.k * 2.5, 2.4);
+  }
+  function zeichnenHimmel() {
+    F = { bild: null, stern: null, hell: null, pfad: null };
+    if (S.art) { F.stern = S.art; F.bild = ART[S.art].kategorie; }
+    else if (S.wis) { F.bild = WIS[S.wis].kategorie; F.hell = wisNutzer[S.wis] || []; }
+    else if (S.wz) { F.hell = wzNutzer[S.wz] || []; }
+    else if (S.an) { F.pfad = AN[S.an].weg; F.hell = AN[S.an].weg; }
+    else if (S.kat) { F.bild = S.kat; }
+    zielFn = function () {
+      if (!BILDER.length) { return cam; }
+      if (F.stern) {
+        var st = STERNE[F.stern], k = artikelK();
+        if (S.ab !== null) {
+          var u = st.abs.filter(function (x) { return x.i === S.ab; })[0];
+          if (u) { return { x: st.x + u.dx, y: st.y + u.dy, k: k * 2.3 }; }
+        }
+        if (S.sat) {
+          var t = st.sat.filter(function (x) { return x.w === S.sat; })[0];
+          if (t) { return { x: st.x + t.dx, y: st.y + t.dy, k: k * 2.3 }; }
+        }
+        return { x: st.x, y: st.y, k: k };
+      }
+      if (F.bild) { return einpassen(bildNach(F.bild).welt, 26, 2.8); }
+      if (F.pfad) {
+        var pb = { x0: 1e9, x1: -1e9, y0: 1e9, y1: -1e9 };
+        F.pfad.forEach(function (id) { var s = STERNE[id]; pb.x0 = Math.min(pb.x0, s.x - 90); pb.x1 = Math.max(pb.x1, s.x + 90); pb.y0 = Math.min(pb.y0, s.y - 30); pb.y1 = Math.max(pb.y1, s.y + 30); });
+        return einpassen(pb, 20, 2.2);
+      }
+      return einpassen(weltBox(), 22);
+    };
+    fliegen();
+    var ort = ["<b>Selbstständigkeit</b>"];
+    if (F.bild) { ort.push('<span class="sep">›</span>' + esc(KAT[F.bild].name)); }
+    if (F.stern) { ort.push('<span class="sep">›</span>' + esc(ART[F.stern].name)); }
+    if (S.art && S.ab !== null) { ort.push('<span class="sep">›</span>' + esc(ART[S.art].abschnitte[S.ab].titel || "")); }
+    if (S.art && S.sat && WIS[S.sat]) { ort.push('<span class="sep">›</span>' + esc(WIS[S.sat].name)); }
+    if (S.an) { ort.push('<span class="sep">·</span>' + esc(AN[S.an].name)); }
+    if (S.wz) { ort.push('<span class="sep">·</span>' + esc(WZ[S.wz].name) + " in " + F.hell.length + " Abläufen"); }
+    $("himmelOrt").innerHTML = ort.join(" ");
+    var ek = ebene();
+    $("rauszoomen").hidden = !(F.bild || S.an || S.wz);
+    $("rauszoomen").querySelector("span").textContent = ek === 3 ? "Zum Ablauf" : (ek === 2 || S.wis) ? "Zur Kategorie" : "Alles zeigen";
+  }
+
+  function fliegen() {
+    var z = zielFn();
+    if (!bewegung() || !B.w) { cam = z; flug = null; anfordern(); return; }
+    var dx = (z.x - cam.x) * Math.min(z.k, cam.k), dy = (z.y - cam.y) * Math.min(z.k, cam.k);
+    var weg = Math.hypot(dx, dy) + Math.abs(Math.log(z.k / cam.k)) * 260;
+    if (weg < 1) { cam = z; anfordern(); return; }
+    flug = { a: { x: cam.x, y: cam.y, k: cam.k }, t0: performance.now(), dauer: Math.max(560, Math.min(1250, 480 + weg * .5)), zurueck: weg > 520 ? .22 : weg > 260 ? .1 : 0 };
+    anfordern();
+  }
+  function ease(t) { return t < .5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2; }
+  function flugSchritt(now) {
+    if (!flug) { if (zielFn) { cam = zielFn(); } return false; }
+    var t = Math.min(1, (now - flug.t0) / flug.dauer), e = ease(t), z = zielFn();
+    var lk = Math.log(flug.a.k) + (Math.log(z.k) - Math.log(flug.a.k)) * e;
+    cam = { x: flug.a.x + (z.x - flug.a.x) * e, y: flug.a.y + (z.y - flug.a.y) * e, k: Math.exp(lk) * (1 - flug.zurueck * Math.sin(Math.PI * t)) };
+    if (t >= 1) { flug = null; cam = z; }
+    return true;
+  }
+
+  function sx(x) { return B.x + (x - cam.x) * cam.k + B.w / 2; }
+  function sy(y) { return B.y + (y - cam.y) * cam.k + B.h / 2; }
+  function alpha(c, a) {
+    if (!c) { return "rgba(0,0,0," + a + ")"; }
+    if (c.indexOf("rgba") === 0) { return c.replace(/,\s*[\d.]+\)$/, "," + (parseFloat(/,\s*([\d.]+)\)$/.exec(c)[1]) * a).toFixed(3) + ")"); }
+    if (c.indexOf("#") === 0) {
+      var h = c.slice(1); if (h.length === 3) { h = h.replace(/./g, "$&$&"); }
+      return "rgba(" + parseInt(h.slice(0, 2), 16) + "," + parseInt(h.slice(2, 4), 16) + "," + parseInt(h.slice(4, 6), 16) + "," + a + ")";
+    }
+    return c;
+  }
+  function kante(ax, ay, bx, by) {
+    var my = (ay + by) / 2;
+    ctx.moveTo(sx(ax), sy(ay));
+    ctx.bezierCurveTo(sx(ax), sy(my), sx(bx), sy(my), sx(bx), sy(by));
+  }
+
+  /* Sternenfeld: Tiefe z, nah heißt klein. Zoomt die Kamera hinein, kommen die
+     Sterne näher und ziehen nach außen vorbei; beim Rausgehen umgekehrt. */
+  var FELD = [];
+  (function () { var r = zufall("feld"); for (var i = 0; i < 240; i++) { FELD.push({ u: r() * 2 - 1, v: r() * 2 - 1, z: .12 + r() * .88, p: r() * 6.28, px: null, py: null }); } })();
+  var letzteKam = null, letzteZeit = 0, letzterScroll = null;
+  function feldBewegen(now) {
+    var dt = letzteZeit ? Math.min(.05, (now - letzteZeit) / 1000) : 0;
+    letzteZeit = now;
+    var dz = 0, du = 0, dv = 0;
+    if (letzteKam && bewegung()) {
+      dz = -Math.log(cam.k / letzteKam.k) * .55;
+      du = -(cam.x - letzteKam.x) * cam.k / Math.max(VW, VH) * .9;
+      dv = -(cam.y - letzteKam.y) * cam.k / Math.max(VW, VH) * .9;
+    }
+    if (bewegung()) { dz -= dt * .006; }
+    var sc = B.y;
+    if (letzterScroll !== null && bewegung()) { dv += (sc - letzterScroll) / Math.max(VW, VH) * .12; }
+    letzterScroll = sc;
+    letzteKam = { x: cam.x, y: cam.y, k: cam.k };
+    var r = Math.random;
+    FELD.forEach(function (s) {
+      s.z += dz * s.z; s.u += du * s.z * 1.4; s.v += dv * s.z * 1.4;
+      if (s.z < .1) { s.z += .9; s.u = r() * 2 - 1; s.v = r() * 2 - 1; s.px = null; }
+      else if (s.z > 1) { s.z -= .9; s.u = (r() * 2 - 1) * .3; s.v = (r() * 2 - 1) * .3; s.px = null; }
+      if (s.u < -3 || s.u > 3 || s.v < -3 || s.v > 3) { s.z = .85 + r() * .15; s.u = r() * 2 - 1; s.v = r() * 2 - 1; s.px = null; }
+    });
+    return Math.abs(dz) + Math.abs(du) + Math.abs(dv);
+  }
+  function feldMalen(tempo, zeit) {
+    var fx = B.x + B.w / 2, fy = Math.max(B.y + B.h / 2, VH * .22), R = Math.max(VW, VH) * .42;
+    ctx.lineCap = "round";
+    FELD.forEach(function (s) {
+      var x = fx + s.u * R / s.z, y = fy + s.v * R / s.z;
+      var nah = Math.min(1, (1 - s.z) * 1.15);
+      var a = (.18 + nah * .6) * (bewegung() ? .82 + .18 * Math.sin(zeit * .8 + s.p) : 1);
+      if (x > -20 && x < VW + 20 && y > -20 && y < VH + 20) {
+        if (s.px !== null && tempo > .0015) {
+          ctx.strokeStyle = alpha(FARBE["h-staub"], a); ctx.lineWidth = .6 + nah * 1.5;
+          ctx.beginPath(); ctx.moveTo(s.px, s.py); ctx.lineTo(x, y); ctx.stroke();
+        } else {
+          ctx.fillStyle = alpha(FARBE["h-staub"], a);
+          ctx.beginPath(); ctx.arc(x, y, .5 + nah * 1.3, 0, 6.283); ctx.fill();
+        }
+      }
+      s.px = x; s.py = y;
+    });
+  }
+
+  function beschriften(text, x, y, ausrichtung, gewicht, a) {
+    ctx.font = gewicht + " 12px 'IBM Plex Sans', 'Segoe UI', sans-serif";
+    var bw = ctx.measureText(text).width;
+    if (ausrichtung === "right" && x - bw < 6) { x = 6 + bw; }
+    if (ausrichtung === "left" && x + bw > VW - 6) { x = VW - 6 - bw; }
+    ctx.textAlign = ausrichtung; ctx.textBaseline = "middle";
+    ctx.fillStyle = alpha(FARBE["h-schrift"], a);
+    ctx.fillText(text, x, y);
+  }
+  function malen(now) {
+    var zeit = bewegung() ? now / 1000 : 0;
+    ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+    var g = ctx.createLinearGradient(0, 0, 0, VH);
+    g.addColorStop(0, FARBE["h-oben"]); g.addColorStop(1, FARBE["h-unten"]);
+    ctx.fillStyle = g; ctx.fillRect(0, 0, VW, VH);
+    var tempo = feldBewegen(now);
+    feldMalen(tempo, zeit);
+    if (B.y + B.h < -40 || !BILDER.length) { return; }
+
+    ctx.save();
+    ctx.beginPath(); ctx.rect(0, B.y - 60, VW, B.h + 60); ctx.clip();
+    var ek = ebene();
+    /* Querverbindungen */
+    ctx.setLineDash([2, 5]); ctx.lineWidth = 1;
+    QUER.forEach(function (q) {
+      var a = STERNE[q[0]], b = STERNE[q[1]];
+      var dim = F.bild && a.bild.id !== F.bild && b.bild.id !== F.bild ? .2 : 1;
+      if (F.pfad) { dim = .25; }
+      ctx.strokeStyle = alpha(FARBE["h-linie"], .35 * dim);
+      ctx.beginPath(); ctx.moveTo(sx(a.x), sy(a.y)); ctx.lineTo(sx(b.x), sy(b.y)); ctx.stroke();
+    });
+    ctx.setLineDash([]);
+    /* Anlass: der Weg durch die Sternbilder */
+    if (F.pfad && F.pfad.length > 1) {
+      ctx.strokeStyle = alpha(FARBE["akzent"], .8); ctx.lineWidth = 1.6;
+      ctx.beginPath();
+      F.pfad.forEach(function (id, i) { var s = STERNE[id]; if (i) { ctx.lineTo(sx(s.x), sy(s.y)); } else { ctx.moveTo(sx(s.x), sy(s.y)); } });
+      ctx.stroke();
+    }
+
+    var nahLabel = ABST * cam.k >= 30;
+    BILDER.forEach(function (b) {
+      var dim = (F.bild && b.id !== F.bild) ? .28 : 1;
+      if (F.pfad) { dim = .45; }
+      if (hover && hover.bild === b.id && !hover.stern && dim < 1) { dim = .7; }
+      var hoverBild = hover && hover.bild === b.id && !hover.stern && !F.bild;
+      ctx.strokeStyle = alpha(FARBE["h-linie"], dim * (hoverBild ? 1.4 : 1));
+      ctx.lineWidth = hoverBild ? 1.6 : 1.2;
+      ctx.beginPath();
+      var px = b.qx, py = b.qy;
+      b.sterne.forEach(function (s) { kante(px, py, s.x, s.y); px = s.x; py = s.y; });
+      ctx.stroke();
+      ctx.strokeStyle = alpha(FARBE["h-stern"], .7 * dim); ctx.lineWidth = 1.2;
+      ctx.beginPath(); ctx.arc(sx(b.qx), sy(b.qy), Math.max(3, 4.2 * Math.min(cam.k, 1.6)), 0, 6.283); ctx.stroke();
+
+      b.sterne.forEach(function (s, i) {
+        var hell = F.hell && F.hell.indexOf(s.id) >= 0;
+        var dimS = F.hell ? (hell ? 1 : .3) : dim;
+        if (hoverBild) { dimS = 1; }
+        var fokus = F.stern === s.id;
+        var rr = s.r * Math.max(.8, Math.min(cam.k, 2.4));
+        var tw = bewegung() ? .86 + .14 * Math.sin(zeit * 1.3 + i * 1.7 + b.qx) : 1;
+        var X = sx(s.x), Y = sy(s.y);
+        var glow = ctx.createRadialGradient(X, Y, 0, X, Y, rr * 4.2);
+        glow.addColorStop(0, alpha(FARBE["akzent"], .32 * dimS * tw)); glow.addColorStop(1, alpha(FARBE["akzent"], 0));
+        ctx.fillStyle = glow; ctx.beginPath(); ctx.arc(X, Y, rr * 4.2, 0, 6.283); ctx.fill();
+        ctx.fillStyle = alpha(FARBE["h-stern"], dimS * tw);
+        ctx.beginPath(); ctx.arc(X, Y, rr, 0, 6.283); ctx.fill();
+
+        /* Abschnitte und Fachwissen, sichtbar ab der Ablauf-Ebene */
+        var ua = Math.max(0, Math.min(1, (cam.k - 1.4) / .8));
+        if (ua > 0 && (!F.bild || b.id === F.bild)) {
+          var ra = ua * (fokus ? 1 : .5);
+          ctx.strokeStyle = alpha(FARBE["h-linie"], ra * .8); ctx.lineWidth = 1;
+          s.abs.forEach(function (u) {
+            ctx.beginPath(); ctx.moveTo(X, Y); ctx.lineTo(X + u.dx * cam.k, Y + u.dy * cam.k); ctx.stroke();
+          });
+          s.abs.forEach(function (u) {
+            var an = fokus && S.ab === u.i, hv = hover && hover.ab === u.i && hover.stern === s.id;
+            var ux = X + u.dx * cam.k, uy = Y + u.dy * cam.k, ur = (an ? 3.4 : 2.4) * Math.min(1.6, cam.k / 2);
+            ctx.fillStyle = alpha(an ? FARBE["akzent"] : FARBE["h-stern"], ra * (an || hv ? 1 : .85));
+            ctx.beginPath(); ctx.arc(ux, uy, ur, 0, 6.283); ctx.fill();
+            if (fokus && ua > .5) {
+              var rechts = u.dx >= 0;
+              beschriften(u.name, ux + (rechts ? ur + 7 : -ur - 7), uy, rechts ? "left" : "right", an || hv ? "600" : "500", ra * (S.ab !== null && !an ? .55 : .95));
+            }
+          });
+          s.sat.forEach(function (t) {
+            var an = fokus && S.sat === t.w, hv = hover && hover.sat === t.w && hover.stern === s.id;
+            var tx = X + t.dx * cam.k, ty = Y + t.dy * cam.k, tr2 = (an ? 3 : 2) * Math.min(1.6, cam.k / 2);
+            ctx.strokeStyle = alpha(an ? FARBE["akzent"] : FARBE["h-stern"], ra * .9); ctx.lineWidth = 1.2;
+            ctx.beginPath(); ctx.arc(tx, ty, tr2, 0, 6.283); ctx.stroke();
+            if (an) { ctx.fillStyle = alpha(FARBE["akzent"], ra); ctx.fill(); }
+            if (fokus && ua > .5 && (an || hv || cam.k > artikelK() * 1.6 || S.ab === null)) {
+              var rechts2 = t.dx >= 0;
+              beschriften(WIS[t.w] ? WIS[t.w].name : t.w, tx + (rechts2 ? tr2 + 7 : -tr2 - 7), ty, rechts2 ? "left" : "right", an || hv ? "600" : "400", ra * (an || hv ? .95 : .6));
+            }
+          });
+        } else if (F.hell && S.wis && hell) {
+          s.sat.forEach(function (t) {
+            if (t.w !== S.wis) { return; }
+            ctx.fillStyle = alpha(FARBE["akzent"], 1);
+            ctx.beginPath(); ctx.arc(X + t.dx * Math.max(cam.k, 1.2), Y + t.dy * Math.max(cam.k, 1.2), 2.4, 0, 6.283); ctx.fill();
+          });
+        }
+        if (fokus) {
+          var pr = rr + 6 + (bewegung() ? Math.sin(zeit * 2) * 1.1 : 0);
+          ctx.strokeStyle = FARBE["akzent"]; ctx.lineWidth = 1.5;
+          ctx.beginPath(); ctx.arc(X, Y, pr, 0, 6.283); ctx.stroke();
+        }
+        var hvS = hover && hover.stern === s.id && !hover.ab && hover.ab !== 0 && !hover.sat;
+        var zeig = (nahLabel && b.id === F.bild && ek === 1) || hvS || hell || (ek >= 2 && b.id === F.bild);
+        if (zeig) {
+          if (!(fokus && ek >= 2)) {
+            var rechts3 = s.lx >= 0;
+            var aL = Math.max(dimS, .35) * (ek >= 2 && !hvS ? .55 : 1);
+            beschriften(ART[s.id].name, X + (rechts3 ? rr + 10 : -rr - 10), Y, rechts3 ? "left" : "right", hvS ? "600" : "500", aL);
+          }
+        }
+      });
+      /* Name des Sternbilds */
+      var la = F.bild ? (b.id === F.bild && ek === 1 ? dim : 0) : dim;
+      if (!F.bild && F.pfad) { la = .35; }
+      if (hover && hover.bild === b.id && !la) { la = .8; }
+      if (la > .01) {
+        ctx.font = "600 " + (hoverBild ? 13 : 12) + "px Geist, 'IBM Plex Sans', sans-serif";
+        ctx.textAlign = "center"; ctx.textBaseline = "top";
+        ctx.fillStyle = alpha(FARBE["h-schrift"], la * (hoverBild ? 1 : .88));
+        ctx.fillText(breitLayout ? b.k.name : KURZ[b.id] || b.k.name, sx(b.qx), sy(b.qy) + 10);
+      }
+    });
+    ctx.restore();
+  }
+
+  var laeuft = false;
+  function anfordern() { if (!laeuft) { laeuft = true; requestAnimationFrame(bild); } }
+  function bild(now) {
+    laeuft = false;
+    messen();
+    if (!VW) { return; }
+    var weiter = flugSchritt(now);
+    malen(now);
+    if (weiter || bewegung()) { anfordern(); }
+  }
+  function messen() {
+    var r = band.getBoundingClientRect();
+    var w = r.width, h = r.height;
+    var alt = B.w;
+    B = { x: r.left, y: r.top, w: w, h: h };
+    var vw = window.innerWidth, vh = window.innerHeight;
+    if (vw !== VW || vh !== VH) {
+      VW = vw; VH = vh; DPR = Math.min(2, window.devicePixelRatio || 1);
+      cv.width = Math.round(VW * DPR); cv.height = Math.round(VH * DPR);
+    }
+    var breit = w >= 700;
+    if (w && (breitLayout === null || breit !== breitLayout)) { anordnen(); if (zielFn) { cam = zielFn(); } }
+    if (w !== alt && !flug && zielFn) { cam = zielFn(); }
+  }
+  new ResizeObserver(function () { anfordern(); }).observe(band);
+  window.addEventListener("resize", anfordern);
+  window.addEventListener("scroll", anfordern, { passive: true });
+
+  /* Treffer im Himmel — was klickbar ist, hängt an der Ebene. */
+  function trefferBei(x, y) {
+    var ek = ebene(), i;
+    if (ek >= 2) {
+      var st = STERNE[S.art], X = sx(st.x), Y = sy(st.y), best = null, bd = 14;
+      st.abs.forEach(function (u) { var d = Math.hypot(X + u.dx * cam.k - x, Y + u.dy * cam.k - y); if (d < bd) { bd = d; best = { stern: st.id, bild: F.bild, ab: u.i }; } });
+      st.sat.forEach(function (t) { var d = Math.hypot(X + t.dx * cam.k - x, Y + t.dy * cam.k - y); if (d < bd) { bd = d; best = { stern: st.id, bild: F.bild, sat: t.w }; } });
+      if (best) { return best; }
+    }
+    if (ek >= 1) {
+      var b = bildNach(F.bild), bs = null, bd2 = 16;
+      b.sterne.forEach(function (s) { var d = Math.hypot(sx(s.x) - x, sy(s.y) - y); if (d < bd2) { bd2 = d; bs = { stern: s.id, bild: b.id }; } });
+      if (bs) { return bs; }
+    }
+    for (i = 0; i < BILDER.length; i++) {
+      var w = BILDER[i].welt;
+      if (BILDER[i].id === F.bild) { continue; }
+      if (x >= sx(w.x0) - 8 && x <= sx(w.x1) + 8 && y >= sy(w.y0) - 8 && y <= sy(w.y1) + 22) { return { bild: BILDER[i].id }; }
+    }
+    return null;
+  }
+  function punkt(e) { return { x: e.clientX, y: e.clientY }; }
+  band.addEventListener("pointermove", function (e) {
+    if (e.target.closest("button")) { return; }
+    var p = punkt(e), t = trefferBei(p.x, p.y), alt = hover;
+    hover = t; band.dataset.zeiger = t ? "ja" : "nein";
+    if (JSON.stringify(alt) !== JSON.stringify(t)) { anfordern(); }
+  });
+  band.addEventListener("pointerleave", function () { hover = null; band.dataset.zeiger = "nein"; anfordern(); });
+  band.addEventListener("click", function (e) {
+    if (e.target.closest("button")) { return; }
+    var p = punkt(e), t = trefferBei(p.x, p.y);
+    if (!t) { hoch(); return; }
+    if (t.ab !== undefined) { abschnittZeigen(t.ab); return; }
+    if (t.sat) {
+      var d = inhalt.querySelector('details[data-satw="' + t.sat + '"]');
+      if (d) { d.open = true; d.scrollIntoView({ behavior: bewegung() ? "smooth" : "auto", block: "center" }); }
+      S.sat = t.sat; S.ab = null; zeichnenHimmel(); return;
+    }
+    if (t.stern) { gehe({ art: t.stern, tab: "ablaeufe", kat: t.bild }); return; }
+    gehe({ tab: S.tab === "wissen" ? "wissen" : "ablaeufe", kat: t.bild });
+  });
+
+  /* ---------- Start ---------- */
+  farbenLesen();
+  S = zustandAus(window.location.hash);
+  zeichnen(false);
+  anfordern();
+}
+
+
+
+/* Persönliches Wiki – eigene App seit Oktober 2026, vorher Artifact.
+   Inhalt: Supabase, Tabelle klar_dokumente, sammlung "wiki", id "aktuell";
+   daten.baum ist das ganze Wiki als JSON-Text. Gepflegt vom Sonntagslauf, nicht von hier.
+   „Etwas ergänzen“ schreibt nach sammlung "wiki-eingang". Wiki-Inhalte liegen nie im Repo.
+   Bis die Supabase-Anbindung steht, startet die Seite mit window.WIKI_DATEN
+   ({ baum, wartend, ergaenzen }) – so laufen Tests und die Vorschau. */
+var WIKI = (function () {
+  var gestartet = false;
+  function gueltig(b) { return !!b && Array.isArray(b.artikel) && Number(b.fassung) >= 11; }
+  function start(baum, wahl) {
+    if (gestartet) { return; }
+    gestartet = true;
+    wahl = wahl || {};
+    window.__daten = { baum: baum, wartend: wahl.wartend || 0, ergaenzen: wahl.ergaenzen || null };
+    wikiProgramm(document, window, window.requestAnimationFrame.bind(window), window.ResizeObserver);
+    try {
+      new MutationObserver(function () { if (window.__wb) { window.__wb.farbenLesen(); } })
+        .observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
+    } catch (e) {}
+  }
+  function hinweis(titel, text) {
+    document.getElementById("inhalt").innerHTML = "<h1>" + titel + '</h1><p class="lead">' + text + "</p>";
+  }
+  var vorgabe = window.WIKI_DATEN;
+  if (vorgabe && gueltig(vorgabe.baum)) { start(vorgabe.baum, vorgabe); }
+  else { hinweis("Noch keine Daten", "Die Anmeldung und das Laden aus der Datenbank kommen im nächsten Schritt."); }
+  return { gueltig: gueltig, start: start };
+})();
+</script>
+</body>
+</html>

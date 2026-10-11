@@ -1,0 +1,14 @@
+{
+  "name": "wiki",
+  "private": true,
+  "description": "Lukas' Persönliches Wiki als Web-App",
+  "scripts": {
+    "test": "playwright test",
+    "bauen": "node scripts/bauen.js",
+    "start": "node scripts/server.js",
+    "vorschau": "node scripts/vorschau.js"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.56.1"
+  }
+}

@@ -1,0 +1,58 @@
+{
+  "fassung": 11,
+  "aktualisiert": "2026-10-01",
+  "regel": "Erfundenes Beispiel für die Tests. Nichts davon stammt aus dem echten Wiki.",
+  "gruppen": [
+    { "id": "haushalt", "name": "Haushalt", "kurz": "Erfundene Abläufe rund um Wohnung und Garten." },
+    { "id": "freizeit", "name": "Freizeit", "kurz": "Noch leer." }
+  ],
+  "kategorien": [
+    { "id": "garten", "gruppe": "haushalt", "name": "Garten", "kurz": "Pflanzen, Beete, Werkzeug.", "artikel": ["tomaten-pflanzen", "rasen-maehen"] },
+    { "id": "kueche", "gruppe": "haushalt", "name": "Küche", "kurz": "Vorrat und Ordnung.", "artikel": ["vorrat-pruefen"] }
+  ],
+  "artikel": [
+    {
+      "id": "tomaten-pflanzen", "kategorie": "garten", "name": "Tomaten pflanzen",
+      "wann": "Im Mai, wenn kein Frost mehr kommt.",
+      "abschnitte": [
+        { "titel": "Vorbereiten", "intro": null, "schritte": ["Beet lockern", "Kompost einarbeiten", "Stäbe setzen"], "hinweise": ["Unbestätigt: ob Hornspäne nötig sind."] },
+        { "titel": "Pflanzen", "intro": "Am besten an einem bewölkten Tag.", "schritte": ["Pflanzen tief einsetzen", "Angießen"], "hinweise": [] }
+      ],
+      "seit": "2026-05-01", "wissen": ["frostgrenze"], "werkzeuge": ["giesskanne"], "verwandt": ["rasen-maehen"],
+      "quelle": ["Erfunden"], "alt": []
+    },
+    {
+      "id": "rasen-maehen", "kategorie": "garten", "name": "Rasen mähen",
+      "wann": "Alle zwei Wochen im Sommer.",
+      "abschnitte": [
+        { "titel": null, "intro": null, "schritte": ["Steine absammeln", "Mähen", "Schnittgut kompostieren"], "hinweise": ["Nicht bei Nässe mähen."] }
+      ],
+      "seit": null, "wissen": [], "werkzeuge": ["maeher"], "verwandt": [], "quelle": ["Erfunden"], "alt": []
+    },
+    {
+      "id": "vorrat-pruefen", "kategorie": "kueche", "name": "Vorrat prüfen",
+      "wann": "Vor dem Wocheneinkauf.",
+      "abschnitte": [
+        { "titel": null, "intro": null, "schritte": ["Schrank durchsehen", "Abgelaufenes aussortieren", "Liste schreiben"], "hinweise": [] }
+      ],
+      "seit": null, "wissen": ["mhd"], "werkzeuge": [], "verwandt": [], "quelle": ["Erfunden"], "alt": []
+    }
+  ],
+  "wissen": [
+    {
+      "id": "frostgrenze", "name": "Frost und Eisheilige", "kurz": "Wann es draußen sicher ist.", "kategorie": "garten",
+      "abschnitte": [{ "titel": "Faustregel", "kurz": null, "punkte": ["Nach Mitte Mai ist Frost selten."], "quelle": "Erfunden", "geprueft": "2026-10-01" }]
+    },
+    {
+      "id": "mhd", "name": "Mindesthaltbarkeit", "kurz": "Was das Datum bedeutet.", "kategorie": "kueche",
+      "abschnitte": [{ "titel": null, "kurz": null, "punkte": ["Das Datum ist kein Verfallsdatum."], "quelle": "Erfunden", "geprueft": "2026-10-01" }]
+    }
+  ],
+  "werkzeuge": [
+    { "id": "giesskanne", "name": "Gießkanne", "kurz": "Zehn Liter, grün.", "punkte": ["Steht im Schuppen"], "quelle": "Erfunden", "geprueft": "2026-10-01" },
+    { "id": "maeher", "name": "Rasenmäher", "kurz": "Mit Akku.", "punkte": ["Akku über Nacht laden"], "quelle": "Erfunden", "geprueft": "2026-10-01" }
+  ],
+  "anlaesse": [
+    { "id": "fruehling", "name": "Frühling im Garten", "kurz": "Was im Mai ansteht.", "weg": ["tomaten-pflanzen", "rasen-maehen"] }
+  ]
+}
