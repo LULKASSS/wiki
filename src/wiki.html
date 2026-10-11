@@ -114,10 +114,10 @@ a { color: inherit; }
 /* ---------- Himmel ---------- */
 .grund { position: fixed; inset: 0; width: 100%; height: 100%; display: block; z-index: 0; pointer-events: none; }
 .app { position: relative; z-index: 1; }
-.himmel { position: relative; height: 270px; transition: height .55s var(--ease); cursor: default;
+.himmel { position: relative; height: clamp(170px, 31vh, 270px); transition: height .55s var(--ease); cursor: default;
   -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
 .himmel[data-zeiger="ja"] { cursor: pointer; }
-.app[data-tief="ja"] .himmel { height: 230px; }
+.app[data-tief="ja"] .himmel { height: clamp(150px, 26vh, 230px); }
 .himmel-ort { position: absolute; left: 14px; bottom: 12px; display: flex; align-items: center; gap: 6px; max-width: calc(100% - 160px); white-space: nowrap; overflow: hidden;
   font-size: 12.5px; color: var(--h-schrift); pointer-events: none; }
 .himmel-ort b { font-weight: 600; }
@@ -260,8 +260,8 @@ details.wkarte .wk-inhalt { padding: 0 14px 14px; display: flex; flex-direction:
   .inhalt { padding: 20px 18px 22px; }
   h1 { font-size: 23px; }
   .lead { font-size: 15px; }
-  .himmel { height: 230px; }
-  .app[data-tief="ja"] .himmel { height: 200px; }
+  .himmel { height: clamp(160px, 28vh, 230px); }
+  .app[data-tief="ja"] .himmel { height: clamp(140px, 24vh, 200px); }
   .himmel-ort { display: none; }
   .suche { flex-basis: 180px; }
   .suche kbd { display: none; }
@@ -1305,6 +1305,11 @@ var WIKI = (function () {
      das Token nur unter einer Browser-Sperre auf diesen Schlüssel und meldet es den anderen Tabs.
      Abmelden gibt es hier bewusst nicht – das würde Klar mit abmelden; das geht in Klar. */
   var T = "klar_dokumente", sb = null, nutzer = null;
+  /* Letzter geladener Stand auf diesem Gerät – damit die App auch ohne Netz startet.
+     Gehört zum Konto: ohne Anmeldung wird sie gelöscht. */
+  var KOPIE = "wiki.kopie", stand = null, geprueftAm = 0;
+  function kopieLesen() { try { return JSON.parse(localStorage.getItem(KOPIE)); } catch (e) { return null; } }
+  function kopieWeg() { try { localStorage.removeItem(KOPIE); } catch (e) {} }
   var k = { bereit: false, arbeitet: false, meldung: "", ansicht: null, datei: null };
   var hatteSitzung = false;
   try { hatteSitzung = !!localStorage.getItem("klar.anmeldung"); } catch (e) {}
@@ -1346,10 +1351,40 @@ var WIKI = (function () {
       if (!gueltig(baum)) {
         k.ansicht = "kaputt"; tor(); return;
       }
+      stand = standVon(e[0]); geprueftAm = Date.now();
+      try { localStorage.setItem(KOPIE, JSON.stringify({ nutzer: nutzer.id, stand: stand, baum: JSON.stringify(baum) })); } catch (x) {}
       k.ansicht = null; tor();
       start(baum, { wartend: e[1], ergaenzen: ergaenzen });
-    }, function (f) { k.ansicht = "fehler"; k.meldung = fehlerText(f); tor(); });
+    }, function (f) {
+      if (ausKopie(nutzer.id)) { return; }
+      k.ansicht = "fehler"; k.meldung = fehlerText(f); tor();
+    });
   }
+  function standVon(d) { return String((d && d.aktualisiert) || "") + "|" + String((d && d.fassung) || ""); }
+  /* Ohne Netz: mit der Kopie starten, ohne „Etwas ergänzen“. Ist das Netz zurück, frisch laden. */
+  var ausDerKopie = false;
+  function ausKopie(nutzerId) {
+    var kp = kopieLesen(), baum = null;
+    if (!kp || (nutzerId && kp.nutzer !== nutzerId)) { return false; }
+    try { baum = JSON.parse(kp.baum); } catch (e) { return false; }
+    if (!gueltig(baum)) { return false; }
+    ausDerKopie = true;
+    k.ansicht = null; tor();
+    start(baum, { wartend: 0, ergaenzen: null });
+    window.addEventListener("online", function () { if (!ungespeichert()) { window.location.reload(); } });
+    return true;
+  }
+  function ungespeichert() { var t = document.getElementById("ergtext"); return !!(t && t.value.trim()); }
+  /* Die App bleibt oft tagelang offen. Kommt das Fenster wieder nach vorn, wird höchstens
+     alle zehn Minuten nachgesehen, ob der Sonntagslauf eine neue Fassung geschrieben hat. */
+  document.addEventListener("visibilitychange", function () {
+    if (document.visibilityState !== "visible" || !gestartet || !nutzer || !sb || ausDerKopie) { return; }
+    if (Date.now() - geprueftAm < (window.__wikiPruefAbstand || 600000)) { return; }
+    geprueftAm = Date.now();
+    wikiHolen().then(function (d) {
+      if (d && standVon(d) !== stand && !ungespeichert()) { window.location.reload(); }
+    }, function () {});
+  });
   var bisher = null;
   function verbunden(u) {
     if (nutzer && nutzer.id === u.id) { return; }
@@ -1368,13 +1403,14 @@ var WIKI = (function () {
       sb.auth.onAuthStateChange(function (ereignis, sitzung) {
         /* Erst nach diesem Takt hat die Bibliothek die Anmeldung fertig übernommen. */
         if (sitzung && sitzung.user) { setTimeout(function () { verbunden(sitzung.user); }, 0); }
-        else if (ereignis === "SIGNED_OUT") { nutzer = null; anmeldenZeigen(); }
+        else if (ereignis === "SIGNED_OUT") { nutzer = null; kopieWeg(); anmeldenZeigen(); }
       });
       return sb.auth.getSession();
     }).then(function (r) {
       var s = r && r.data && r.data.session;
-      if (s && s.user) { verbunden(s.user); } else { anmeldenZeigen(); }
+      if (s && s.user) { verbunden(s.user); } else { kopieWeg(); anmeldenZeigen(); }
     }).catch(function () {
+      if (hatteSitzung && ausKopie(null)) { return; }
       k.ansicht = "fehler"; k.meldung = "Keine Verbindung. Sobald du wieder online bist, geht es weiter."; tor();
       window.addEventListener("online", function nochmal() { window.removeEventListener("online", nochmal); if (!sb) { k.start(); } });
     });

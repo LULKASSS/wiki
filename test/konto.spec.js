@@ -49,6 +49,8 @@ function speicher() {
       window.__wikiAuthEreignis = (ereignis, s) => horcher.forEach(cb => cb(ereignis, s));
       window.__wikiSupabase = {
         createClient: (_url, _key, opts) => {
+          /* Kein Netz: die Bibliothek lässt sich nicht laden */
+          if (localStorage.getItem('test.offline')) throw new Error('Failed to fetch');
           window.__wikiOptionen = opts;
           return {
             auth: {
@@ -220,4 +222,62 @@ test('Zwei Tabs: angemeldet in einem heißt angemeldet im anderen, Abmelden in K
   await expect(b.page.locator('#inhalt h1')).toHaveText('Mindesthaltbarkeit');
   expect([...a.fehler, ...b.fehler]).toEqual([]);
   await ctx.close();
+});
+
+test('Ohne Netz startet die App mit dem zuletzt geladenen Stand', async ({ browser }) => {
+  const s = speicher(); s.wikiAnlegen();
+  const ctx = await s.kontext(browser);
+  await angemeldet(ctx);
+  const { page, fehler } = await s.seite(ctx, '/konto?wolke=test#/artikel/vorrat-pruefen');
+  await expect(page.locator('#inhalt h1')).toHaveText('Vorrat prüfen');
+  await page.evaluate(() => localStorage.setItem('test.offline', '1'));
+  await page.reload();
+  await expect(page.locator('#inhalt h1')).toHaveText('Vorrat prüfen');
+  await expect(page.locator('#tor')).toHaveCount(0);
+  await expect(page.locator('.ergaenzen')).toHaveCount(0);
+  expect(fehler).toEqual([]);
+  await ctx.close();
+});
+
+test('Ohne Anmeldung wird die Kopie gelöscht', async ({ browser }) => {
+  const s = speicher(); s.wikiAnlegen();
+  const ctx = await s.kontext(browser);
+  await angemeldet(ctx);
+  const { page } = await s.seite(ctx);
+  await expect(page.locator('#inhalt h1')).toHaveText('Deine Abläufe, als Nachschlagewerk');
+  expect(await page.evaluate(() => !!localStorage.getItem('wiki.kopie'))).toBe(true);
+  await page.evaluate(() => window.__wikiAuthEreignis('SIGNED_OUT', null));
+  await expect(page.locator('#tor[data-ansicht="anmelden"]')).toBeVisible();
+  expect(await page.evaluate(() => localStorage.getItem('wiki.kopie'))).toBeNull();
+  await ctx.close();
+});
+
+test('Neue Fassung vom Sonntagslauf kommt beim Zurückkommen ins Fenster', async ({ browser }) => {
+  const s = speicher(); s.wikiAnlegen();
+  const ctx = await s.kontext(browser);
+  await angemeldet(ctx);
+  await ctx.addInitScript(() => { window.__wikiPruefAbstand = 1; });
+  const { page } = await s.seite(ctx, '/konto?wolke=test#/artikel/rasen-maehen');
+  await expect(page.locator('.zahlen, #inhalt h1').first()).toBeVisible();
+  /* Ohne neue Fassung passiert nichts */
+  await page.evaluate(() => { window.__nichtNeu = true; document.dispatchEvent(new Event('visibilitychange')); });
+  await page.waitForTimeout(300);
+  expect(await page.evaluate(() => window.__nichtNeu)).toBe(true);
+  /* Der Sonntagslauf schreibt Fassung 14 */
+  const neu = { ...BEISPIEL, fassung: 14, aktualisiert: '2026-10-18', artikel: BEISPIEL.artikel.map(a => a.id === 'rasen-maehen' ? { ...a, name: 'Rasen mähen und mulchen' } : a) };
+  s.zeilen.set(`${NUTZER}|wiki|aktuell`, { user_id: NUTZER, sammlung: 'wiki', id: 'aktuell', daten: { baum: JSON.stringify(neu), aktualisiert: '2026-10-18T00:30:00.000Z', fassung: 14 } });
+  await page.evaluate(() => document.dispatchEvent(new Event('visibilitychange')));
+  await expect(page.locator('#inhalt h1')).toHaveText('Rasen mähen und mulchen');
+  await ctx.close();
+});
+
+test('Kleines App-Fenster: der Inhalt beginnt in der oberen Hälfte', async ({ page }, info) => {
+  test.skip(info.project.name !== 'mac', 'eigene Fenstergröße');
+  await page.setViewportSize({ width: 1000, height: 700 });
+  await page.addInitScript(b => { window.WIKI_DATEN = { baum: b, wartend: 0, ergaenzen: null }; }, BEISPIEL);
+  await page.goto('/leer#/artikel/tomaten-pflanzen');
+  await expect(page.locator('#inhalt h1')).toHaveText('Tomaten pflanzen');
+  await page.waitForTimeout(700);
+  const oben = await page.locator('.inhalt').evaluate(e => e.getBoundingClientRect().top);
+  expect(oben).toBeLessThan(350);
 });
