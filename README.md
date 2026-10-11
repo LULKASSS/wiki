@@ -27,6 +27,10 @@ Die Artikel pflegt der Sonntagslauf. Er wertet `wiki-eingang` aus und setzt dana
   anlaesse[{id, name, kurz, weg[]}] }
 ```
 
+## Anmeldung
+
+Die App nutzt dasselbe Konto wie Klar. Wer im selben Browser in Klar angemeldet ist, ist es hier auch. Gibt es noch kein Wiki im Konto, bietet die App nach der Anmeldung einmal „Wiki übernehmen“ an: `wissensbaum.json` wählen, prüfen, übernehmen.
+
 ## Direktlinks
 
 `#/artikel/<id>`, `#/wissen/<id>`, `#/werkzeug/<id>` und `#/anlass/<id>` öffnen genau diese Seite. So verlinkt Klar hierher. Alte Adressen aus dem Artifact (`#a.<id>` usw.) funktionieren weiter.
@@ -35,10 +39,9 @@ Die Artikel pflegt der Sonntagslauf. Er wertet `wiki-eingang` aus und setzt dana
 
 ```
 npm install
-npm test            # Playwright, PC- und Handybreite
-npm start           # http://localhost:4174, ohne Daten
-npm run bauen       # _site/ für GitHub Pages
-node scripts/vorschau.js <wiki.json> vorschau/wiki.html   # mit Daten, nie committen
+npm test               # Fehlercheck und Playwright (Mac, Mac dunkel, iPhone)
+npm run dev            # http://localhost:5192 mit dem Beispiel-Wiki
+npm run oeffentlich    # public/ für GitHub Pages
 ```
 
-Jeder Push auf `main` wird getestet und nach GitHub Pages veröffentlicht (`.github/workflows/pages.yml`).
+Jeder Push wird getestet, `main` wird danach nach GitHub Pages veröffentlicht (`.github/workflows/pages.yml`).

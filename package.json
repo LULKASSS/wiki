@@ -1,14 +1,18 @@
 {
   "name": "wiki",
+  "version": "1.0.0",
+  "description": "Persönliches Wiki – Lukas' Abläufe, Fachwissen und Werkzeuge als Web-App",
   "private": true,
-  "description": "Lukas' Persönliches Wiki als Web-App",
+  "author": "Lukas Rückborn",
+  "type": "module",
   "scripts": {
-    "test": "playwright test",
-    "bauen": "node scripts/bauen.js",
-    "start": "node scripts/server.js",
-    "vorschau": "node scripts/vorschau.js"
+    "dev": "node scripts/serve.mjs",
+    "check": "node scripts/check.mjs",
+    "test": "node scripts/check.mjs && playwright test",
+    "oeffentlich": "node scripts/oeffentlich.mjs",
+    "vorschau": "node scripts/vorschau.mjs"
   },
   "devDependencies": {
-    "@playwright/test": "1.56.1"
+    "@playwright/test": "^1.64.0"
   }
 }

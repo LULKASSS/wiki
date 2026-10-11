@@ -1,5 +1,10 @@
 node_modules/
-_site/
-vorschau/
 test-results/
 playwright-report/
+.DS_Store
+
+# Wiki-Inhalte gehören nie ins Repo – das Repo ist öffentlich.
+daten/
+vorschau/
+# Gebaute Seite – entsteht in GitHub Actions
+public/
