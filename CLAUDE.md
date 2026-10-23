@@ -3,6 +3,30 @@
 Lukas' Nachschlagewerk: wie er seine Arbeit macht (Abläufe in Schritten, Fachwissen mit Quelle, Werkzeuge).
 Läuft unter https://lulkasss.github.io/wiki/. Sprache in App, Kommentaren und Commits: **Deutsch**.
 
+## Ziel
+- Wofür: Lukas findet in Sekunden, wie er einen Ablauf macht und was fachlich gilt, und sieht sofort, was das Wiki seit
+  seinem letzten Besuch dazugelernt hat.
+- Wer, wann: Lukas, kurz vor oder während einer Aufgabe oder eines Termins; oft am iPhone (Home-Bildschirm), sonst am Mac
+  neben Klar.
+- Gelungen, wenn: Mit einer Suche oder zwei Tipps ist er an der richtigen Stelle, und neue Abschnitte findet er, ohne
+  danach zu suchen.
+- Abgenommen: Inhalte und Gliederung (Anlässe, Abläufe in Bereichen, Fachwissen, Werkzeuge), Suche mit `/`, Direktlinks
+  `#/artikel/<id>`, Abläufe als nummerierte Schritte mit Randnotiz „Worauf es ankommt“ (11.10.2026), Flieder als einzige
+  Akzentfarbe, hell und dunkel, ruhige Animationen.
+- Nicht gewollt: Blau; Spielanzeige-Look (Ringe, pulsierende Punkte); Titelbalken oben links (Logo, App-Name); viel Text.
+  23.10.2026: „alles neu, neue Visuals, neue Animationen, sinnvoll aufgeteilt“; Neues war in der App nicht zu finden.
+
+## Verlauf der Entwürfe
+- Neuentwurf 1 (23.10.2026, Branch `neuentwurf`, `entwurf/wiki-neu.html`, Vorschau mit echten Daten als privates Artifact
+  https://claude.ai/artifact/J3SGH1NQbgNAdoG8iHd4SQ): Leiste links am Mac, unten am Handy (Start, Abläufe, Nachschlagen,
+  Suchen). Start: große Frage mit Suche, Karte „Seiten haben Neues“ (Vergleich mit dem zuletzt gesehenen Stand, je
+  Abschnitt eine Prüfsumme, „Gesehen“ setzt ihn neu), Anlässe als Linienplan (Weg aus Stationen, zeichnet sich beim
+  ersten Besuch), Bereiche als Chips. Artikel: Abschnitte als mitlaufende Leiste, Schritte als Weg, der sich beim Lesen
+  füllt, Randnotiz daneben (Handy darunter), Neues leuchtet beim Hinspringen kurz auf. Nachschlagen: Umschalter
+  Fachwissen/Werkzeuge mit Prüfdatum. Suche als Blatt (Handy von unten), findet auch Text in Schritten.
+  Noch ohne Anmeldung und Supabase; in der echten App kommt „vorher“ aus `wiki.kopie` auf dem Gerät.
+  `node scripts/entwurf.mjs <wiki.json> [<vorher.json>] <ausgabe.html> [--seite]` baut ihn, mit echten Daten nie ins Repo.
+
 Konzept und Regeln stehen im Repo `LULKASSS/Assistenz-LR`: `konzept/wissen-und-gedaechtnis.md` und `auftraege/wiki-app.md`.
 Aufgebaut wie Klar (`LULKASSS/klar`): eine Seite, Skripte in `scripts/`, Playwright-Tests, GitHub Actions veröffentlicht `main`.
 
