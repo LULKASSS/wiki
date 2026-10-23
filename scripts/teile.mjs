@@ -19,10 +19,10 @@ export function mitZiel(code, ziel) {
 }
 
 /* Seite mit eingebetteten Daten (Entwicklung, Vorschau) – ohne Konto. */
-export function mitDaten(code, baum, ergaenzenText = null) {
+export function mitDaten(code, baum, ergaenzenText = null, vorher = null) {
   if (!code.includes(ANKER)) throw new Error('src/wiki.html: Einfügestelle vor wikiProgramm fehlt');
   const erg = ergaenzenText === null ? 'null' : `function () { return Promise.resolve(${JSON.stringify(ergaenzenText)}); }`;
-  return code.replace(ANKER, () => `<script>\nwindow.WIKI_DATEN = { baum: ${json(baum)}, wartend: 0, ergaenzen: ${erg} };\n</script>\n` + ANKER);
+  return code.replace(ANKER, () => `<script>\nwindow.WIKI_DATEN = { baum: ${json(baum)}, vorher: ${vorher ? json(vorher) : 'null'}, wartend: 0, ergaenzen: ${erg} };\n</script>\n` + ANKER);
 }
 
 export const ICONS = ['wiki-192.png', 'wiki-512.png', 'wiki-maske-512.png'];
