@@ -20,7 +20,9 @@ function speicher() {
     }
     if (st.op === 'upsert') { zeilen.set(schluessel(st.row), st.row); return { data: null, error: null }; }
     if (st.op === 'delete') { [...zeilen.values()].filter(passt).forEach(r => zeilen.delete(schluessel(r))); return { data: null, error: null }; }
-    const liste = [...zeilen.values()].filter(passt);
+    let liste = [...zeilen.values()].filter(passt);
+    if (st.order) { const [k, auf] = st.order; liste.sort((x, y) => (x[k] < y[k] ? -1 : x[k] > y[k] ? 1 : 0) * (auf ? 1 : -1)); }
+    if (st.limit) liste = liste.slice(0, st.limit);
     if (st.single) return { data: liste[0] ? { daten: liste[0].daten } : null, error: null };
     return { data: liste.map(r => ({ id: r.id, daten: r.daten })), error: null };
   }
@@ -39,6 +41,7 @@ function speicher() {
           select() { return b; }, insert(row) { st.op = 'insert'; st.row = row; return b; },
           upsert(row) { st.op = 'upsert'; st.row = row; return b; }, delete() { st.op = 'delete'; return b; },
           eq(k, v) { st.filters.push([k, v]); return b; }, maybeSingle() { st.single = true; return b; },
+          order(k, o) { st.order = [k, !o || o.ascending !== false]; return b; }, limit(n) { st.limit = n; return b; },
           then(ok, nein) { return window.__wikiDb(JSON.stringify(st)).then(ok, nein); }
         };
         return b;
@@ -162,7 +165,7 @@ test('Übernahme überschreibt nie ein Wiki, das inzwischen da ist', async ({ br
   /* Währenddessen schreibt der Sonntagslauf ein Wiki */
   s.wikiAnlegen({ ...BEISPIEL, fassung: 14, aktualisiert: '2026-10-12' });
   await page.locator('[data-wtu="uebernehmen"]').click();
-  await expect(page.locator('.start-kopf .zahlen')).toContainText('Stand 12.10.2026');
+  await expect(page.locator('#leistefuss')).toContainText('Stand 12.10.2026');
   expect(s.zeilen.get(`${NUTZER}|wiki|aktuell`).daten.fassung).toBe(14);
   await ctx.close();
 });
@@ -279,6 +282,44 @@ test('Kleines App-Fenster: der Inhalt beginnt in der oberen Hälfte', async ({ p
   await page.goto('/leer#/artikel/tomaten-pflanzen');
   await expect(page.locator('#inhalt h1')).toHaveText('Tomaten pflanzen');
   await page.waitForTimeout(700);
-  const oben = await page.locator('.inhalt').evaluate(e => e.getBoundingClientRect().top);
+  const oben = await page.locator('#inhalt h1').evaluate(e => e.getBoundingClientRect().top);
   expect(oben).toBeLessThan(350);
+});
+
+test('Neu seit dem letzten Besuch: ohne Gesehen-Stand mit der letzten Sicherung verglichen @mobil', async ({ browser }) => {
+  const s = speicher();
+  const neu = { ...BEISPIEL, fassung: 12, artikel: BEISPIEL.artikel.map(a => a.id === 'rasen-maehen' ? { ...a, abschnitte: [...a.abschnitte, { titel: 'Im Herbst', intro: null, schritte: ['Laub vorher abrechen'], hinweise: [] }] } : a) };
+  s.wikiAnlegen(neu);
+  for (const [id, f] of [['2026-10-01-fassung-10', 10], ['2026-10-05-fassung-11', 11]])
+    s.zeilen.set(`${NUTZER}|wiki-sicherungen|${id}`, { user_id: NUTZER, sammlung: 'wiki-sicherungen', id, daten: { baum: JSON.stringify({ ...BEISPIEL, fassung: f }), fassung: f } });
+  const ctx = await s.kontext(browser);
+  await angemeldet(ctx);
+  const { page, fehler } = await s.seite(ctx);
+  await expect(page.locator('.neukarte .gross')).toHaveText('1');
+  await expect(page.locator('.neukarte')).toContainText('seit Fassung 11');
+  await expect(page.locator('.neuliste li')).toContainText('Neuer Abschnitt: Im Herbst');
+  await page.locator('[data-aktion="gesehen"]').click();
+  await expect(page.locator('.neukarte')).toHaveCount(0);
+  await page.reload();
+  await expect(page.locator('#inhalt h1')).toHaveText('Wie machst du das nochmal?');
+  await expect(page.locator('.neukarte')).toHaveCount(0);
+  expect([...s.zeilen.values()].filter(z => z.sammlung === 'wiki-sicherungen')).toHaveLength(2);
+  expect(fehler).toEqual([]);
+  await ctx.close();
+});
+
+test('Neu seit dem letzten Besuch: die Kopie auf dem Gerät zählt vor der Sicherung', async ({ browser }) => {
+  const s = speicher(); s.wikiAnlegen();
+  const ctx = await s.kontext(browser);
+  await angemeldet(ctx);
+  const { page } = await s.seite(ctx);
+  await expect(page.locator('#inhalt h1')).toHaveText('Wie machst du das nochmal?');
+  await expect(page.locator('.neukarte')).toHaveCount(0);
+  await page.evaluate(() => localStorage.removeItem('wiki.gesehen'));
+  /* Der Sonntagslauf schreibt Fassung 12 mit einem neuen Werkzeug */
+  s.wikiAnlegen({ ...BEISPIEL, fassung: 12, werkzeuge: [...BEISPIEL.werkzeuge, { id: 'schubkarre', name: 'Schubkarre', kurz: 'Für Erde und Laub.', punkte: ['Reifen prüfen'], quelle: 'Beispiel', geprueft: '2026-10-01' }] });
+  await page.reload();
+  await expect(page.locator('.neukarte')).toContainText('seit Fassung 11');
+  await expect(page.locator('.neuliste li')).toContainText('Neues Werkzeug');
+  await ctx.close();
 });
